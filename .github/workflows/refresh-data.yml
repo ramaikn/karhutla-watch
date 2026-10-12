@@ -2,8 +2,6 @@ name: Perbarui data Karhutla Watch
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '17,47 * * * *'
 
 permissions:
   contents: write

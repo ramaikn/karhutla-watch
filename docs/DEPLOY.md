@@ -13,18 +13,17 @@ Untuk menjalankan web tanpa proses pembaruan, gunakan `bun run dev:web`. Untuk p
 
 Jangan menjalankan dua collector bersamaan. Proses memiliki penguncian dan menulis snapshot secara atomik. Jika proses dihentikan paksa, pastikan collector sudah mati sebelum menghapus `.runtime/collect.lock`. Kegagalan sumber mempertahankan data lama; diagnostik berada pada snapshot/log, bukan badge publik.
 
-## Cron GitHub: dua kali per jam
+## cron-job.org → GitHub Actions
 
-Workflow tersedia di `.github/workflows/refresh-data.yml`, dengan jadwal:
+Workflow tersedia di `.github/workflows/refresh-data.yml` dengan pemicu `workflow_dispatch`. Jadwal diatur pada cron-job.org, bukan pada `schedule` GitHub:
 
 ```yaml
-schedule:
-  - cron: '17,47 * * * *'
+cron: '17,47 * * * *'
 ```
 
-Artinya menit 17 dan 47 setiap jam UTC, bukan jaminan eksekusi tepat waktu. GitHub dapat menunda jadwal dan menonaktifkannya pada repositori publik tidak aktif.
+Artinya menit 17 dan 47 setiap jam UTC. cron-job.org mengirim POST ke API GitHub; collector tetap terkena antrean Actions. Respons diterima bukan jaminan eksekusi atau keberhasilan collector. Lihat [CRON.md](CRON.md) untuk URL, body, header, token dengan cakupan minimum, dan cara memeriksa hasil. Job belum aktif sebelum pemilik mengaturnya pada akun cron-job.org.
 
-GitHub membaca `.github/workflows` di root repositori Karhutla Watch. Fork dapat memerlukan aktivasi workflow berkala secara manual.
+GitHub membaca `.github/workflows` di root repositori Karhutla Watch. Fork perlu mengaktifkan Actions dan membuat job sendiri dengan URL serta token untuk repositori fork.
 
 Workflow melakukan pengujian, pengambilan data, build, dan commit `public/data/latest.json` serta `public/data/air-quality.json` ke branch default. Cache geometri negara mempercepat proses berikutnya. Kunci `FIRMS_MAP_KEY` opsional melalui repository secret. Tanpa secret, jalur unduhan publik tetap berjalan. Repo harus mengizinkan Actions dengan `contents: write`; proteksi branch dapat menolak push bot dan harus disesuaikan pemilik.
 

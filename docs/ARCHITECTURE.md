@@ -26,6 +26,7 @@
 | `config/weather-locations.json` | Empat lokasi cache cadangan, bukan batas pencarian web |
 | `tests/` | Regresi domain, cuaca nasional, dan peringkat |
 | `.github/workflows/` | Pemeriksaan kode dan pembaruan data |
+| `docs/CRON.md` | cron-job.org memicu workflow_dispatch, tanpa schedule bawaan GitHub |
 
 ## Keputusan penting
 

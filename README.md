@@ -74,7 +74,7 @@ Proyek ini bukan layanan tanggap darurat. Untuk informasi resmi, gunakan [BMKG](
 
 ## Deployment
 
-Build menghasilkan folder `dist` yang dapat dihosting statis. Workflow GitHub memperbarui snapshot dua kali per jam; jadwal tidak menjamin eksekusi tepat waktu. Kunci opsional disimpan sebagai Actions secret, bukan file publik. Lihat [panduan deployment](docs/DEPLOY.md).
+Build menghasilkan folder `dist` yang dapat dihosting statis. cron-job.org dapat memicu workflow GitHub dua kali per jam; antrean Actions tetap berlaku. Tidak ada jadwal bawaan GitHub agar pemicu tidak ganda. Kunci opsional disimpan sebagai Actions secret, bukan file publik. Lihat [panduan deployment](docs/DEPLOY.md) dan [pengaturan cron-job.org](docs/CRON.md).
 
 API gratis Open-Meteo ditujukan untuk penggunaan nonkomersial. Penggunaan komersial perlu memeriksa paket dan ketentuan sumber walaupun kode aplikasi berlisensi Apache-2.0.
 
