@@ -9,7 +9,7 @@ export class WeatherClient {
   private cache = new Map<string, Entry>();
   private nextRequestAt = 0;
   private blockedUntil = 0;
-  constructor(private readonly requester: Requester = fetch, private readonly clock: () => number = Date.now) {}
+  constructor(private readonly requester: Requester = (input, options) => globalThis.fetch(input, options), private readonly clock: () => number = Date.now) {}
 
   seed(locations: WeatherLocation[]): void {
     for (const location of locations) {
@@ -24,8 +24,16 @@ export class WeatherClient {
     const cached = this.cache.get(code), now = this.clock();
     if (cached && now - cached.savedAt < ttl && cached.location.points.some((point) => Date.parse(point.time) >= now)) return cached.location;
     if (now < this.blockedUntil) throw new Error("Prakiraan sedang tidak tersedia. Coba lagi sebentar.");
-    if (now < this.nextRequestAt) throw new Error("Tunggu sebentar sebelum memilih lokasi lain.");
-    this.nextRequestAt = now + 1_100;
+    const requestAt = Math.max(now, this.nextRequestAt);
+    this.nextRequestAt = requestAt + 1_100;
+    if (requestAt > now) await new Promise<void>((resolve, reject) => {
+      const abort = () => { clearTimeout(timer); signal.removeEventListener("abort", abort); reject(signal.reason); };
+      const timer = setTimeout(() => { signal.removeEventListener("abort", abort); resolve(); }, requestAt - now);
+      signal.addEventListener("abort", abort, { once: true });
+      if (signal.aborted) abort();
+    });
+    signal.throwIfAborted();
+    if (this.clock() < this.blockedUntil) throw new Error("Prakiraan sedang tidak tersedia. Coba lagi sebentar.");
     const response = await this.requester(`https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4=${code}`, { signal: AbortSignal.any([signal, AbortSignal.timeout(15_000)]) });
     if (response.status === 429) {
       const retry = response.headers.get("Retry-After"), seconds = retry && /^\d+$/.test(retry) ? Number(retry) : NaN;

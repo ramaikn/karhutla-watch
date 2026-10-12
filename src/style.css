@@ -24,6 +24,8 @@ h3 { font-size: 13px; margin-bottom: 10px; }
 label { font-size: 12px; display: flex; flex-direction: column; gap: 7px; }
 select, input { min-height: 34px; border: 1px solid var(--line); background: #11151a; border-radius: 4px; color: var(--text); padding: 6px 9px; font-size: 12px; max-width: 100%; }
 .filters select { min-width: 0; }
+select { appearance: none; padding-right: 30px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='m3 4.5 3 3 3-3' fill='none' stroke='%23b4bac4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px 12px; }
+.news-card { content-visibility: auto; contain-intrinsic-size: auto 100px; }
 #region { width: 170px; } #hours { width: 85px; }
 .filter-options { position: relative; }
 summary { list-style: none; font-size: 12px; border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; }

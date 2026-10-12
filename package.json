@@ -20,6 +20,7 @@
     "collect:news": "bun scripts/collect.ts --news-only",
     "prepare:locations": "bun scripts/locations.ts",
     "prepare:provinces": "bun scripts/provinces.ts",
+    "prepare:data": "bun scripts/prepare-data.ts",
     "collect:air": "bun scripts/air-quality.ts",
     "test": "bun test"
   },

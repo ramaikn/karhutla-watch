@@ -67,7 +67,8 @@
 - Point-in-polygon menentukan provinsi setiap deteksi. Bounding box hanya mempercepat seleksi kandidat; tidak dipakai sebagai batas provinsi. Pulau kecil, pesisir, pergeseran piksel, dan perbedaan referensi dapat menghasilkan deteksi tanpa provinsi; deteksi ini tidak diberi label provinsi terdekat secara sembarang.
 - Jumlah deteksi menentukan urutan menurun; FRP maksimum dan kode provinsi menjadi pemecah seri. Keyakinan tinggi dihitung tersendiri. FRP adalah MW, bukan suhu. Null tidak ditampilkan sebagai nol.
 - Peringkat tetap nasional; waktu, sensor, dan tingkat keyakinan mengikuti pilihan filter. Tidak dibatasi pilihan kotak wilayah peta. Deteksi berulang bukan kejadian berbeda; sensor gagal dapat membuat tren dan peringkat tidak lengkap. Status teknis berada pada snapshot/log. Waktu terakhir pengamatan tersedia pada panel Deteksi.
-- Pengelompokan seluruh snapshot dilakukan dalam worker setelah panel diminta, dengan cache koordinat. Perubahan filter tidak mengulang point-in-polygon. Snapshot baru memicu pengelompokan ulang.
+- Pengelompokan seluruh snapshot dilakukan collector, dengan cache koordinat. Hasil 36 kombinasi waktu/keyakinan/satelit disimpan di `rankings.json` bersama udara yang sudah diurutkan. Panel mengambil berkas ringan sejak halaman dibuka; tidak mengunduh geometri dan tidak mengulang point-in-polygon.
+- Jendela ranking dihitung sampai waktu snapshot collector. Tanggal tersebut ditampilkan di bawah tabel. Filter peta memakai waktu browser sehingga hitungan dekat batas jendela dapat berbeda sampai pembaruan berikutnya. Kegagalan pengambilan mempertahankan ranking lama.
 
 ## Udara CAMS / Open-Meteo
 

@@ -29,12 +29,39 @@ test("prakiraan dimuat sesuai pilihan, cache dipakai, kode salah dan lokasi tida
   expect((await client.get("31.71.03.1001", signal)).code).toBe("31.71.03.1001");
   await client.get("31.71.03.1001", signal);
   expect(calls).toBe(1);
-  await expect(client.get("31.71.03.1002", signal)).rejects.toThrow();
   time += 1_200;
   await expect(client.get("31.71.03.1002", signal)).rejects.toThrow("tidak cocok");
   await expect(client.get("invalid", signal)).rejects.toThrow();
   const aborted = new AbortController(); aborted.abort();
   await expect(client.get("31.71.03.1001", aborted.signal)).rejects.toThrow();
+});
+
+test("fetch bawaan dipanggil dengan konteks global browser", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = function(this: unknown) {
+    expect(this).toBe(globalThis);
+    return Promise.resolve(new Response(JSON.stringify(payload("31.71.03.1001"))));
+  } as unknown as typeof fetch;
+  try {
+    const client = new WeatherClient(undefined, () => now);
+    expect((await client.get("31.71.03.1001", new AbortController().signal)).code).toBe("31.71.03.1001");
+  } finally { globalThis.fetch = original; }
+});
+
+test("pilihan cepat menunggu jeda, dan pilihan yang dibatalkan tidak memanggil sumber", async () => {
+  let calls = 0;
+  const client = new WeatherClient(async (url) => {
+    calls++;
+    return new Response(JSON.stringify(payload(new URL(url).searchParams.get("adm4")!)));
+  }, () => now);
+  await client.get("31.71.03.1001", new AbortController().signal);
+  const controller = new AbortController();
+  const waiting = client.get("31.71.03.1002", controller.signal);
+  controller.abort();
+  await expect(waiting).rejects.toThrow();
+  expect(calls).toBe(1);
+  expect((await client.get("31.71.03.1003", new AbortController().signal)).code).toBe("31.71.03.1003");
+  expect(calls).toBe(2);
 });
 
 test("429 menunda permintaan berikutnya tanpa mengubah prakiraan menjadi data palsu", async () => {

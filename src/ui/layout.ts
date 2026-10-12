@@ -32,8 +32,10 @@ export const layout = `
     <aside id="detail-panel" class="detail-panel surface" aria-label="Detail peta" hidden>
       <div class="drawer-heading"><h2 id="detail-title">Deteksi terbaru</h2><button id="close-detail" type="button" aria-label="Tutup detail">Tutup</button></div>
       <section id="ranking-panel" aria-label="Peringkat wilayah" hidden>
-        <div class="section-heading"><h3>Deteksi per provinsi</h3></div><div id="fire-ranking" class="ranking-scroll"></div>
-        <div class="section-heading"><h3>PM2.5 tertinggi</h3><span>Lokasi acuan · Model</span></div><div id="air-ranking" class="ranking-scroll"></div>
+        <div class="section-heading"><h3>Deteksi per provinsi</h3></div>
+        <p class="source-detail">Provinsi dengan deteksi titik panas terbanyak. FRP: daya panas terdeteksi, dalam megawatt (MW).</p><div id="fire-ranking" class="ranking-scroll"><p class="empty-state">Memuat peringkat…</p></div>
+        <div class="section-heading"><h3>PM2.5 tertinggi</h3></div>
+        <p class="source-detail">Lokasi acuan provinsi dengan PM2.5 tertinggi. PM2.5 dan PM10: partikel udara berukuran hingga 2,5 dan 10 mikrometer.</p><div id="air-ranking" class="ranking-scroll"><p class="empty-state">Memuat peringkat…</p></div>
         <div class="official-links"><a href="https://firms.modaps.eosdis.nasa.gov/" target="_blank" rel="noopener noreferrer">NASA FIRMS ↗</a><a href="https://open-meteo.com/en/docs/air-quality-api" target="_blank" rel="noopener noreferrer">CAMS / Open-Meteo ↗</a></div>
       </section>
       <section id="detections-panel" aria-label="Deteksi terbaru" hidden>

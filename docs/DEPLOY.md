@@ -25,7 +25,7 @@ Artinya menit 17 dan 47 setiap jam UTC. Worker mengirim POST ke API GitHub; coll
 
 GitHub membaca `.github/workflows` di root repositori Karhutla Watch. Fork perlu mengaktifkan Actions dan menyesuaikan konfigurasi Worker dengan akun, repositori, serta token sendiri.
 
-Workflow melakukan pengujian, pengambilan data, build, dan commit `public/data/latest.json` serta `public/data/air-quality.json` ke branch default. Cache geometri negara mempercepat proses berikutnya. Kunci `FIRMS_MAP_KEY` opsional melalui repository secret. Tanpa secret, jalur unduhan publik tetap berjalan. Repo harus mengizinkan Actions dengan `contents: write`; proteksi branch dapat menolak push bot dan harus disesuaikan pemilik.
+Workflow melakukan pengujian, pengambilan data, persiapan ranking/berita, build, dan commit `latest.json`, `air-quality.json`, `rankings.json`, serta `news.json` pada `public/data/` ke branch default. Cache geometri negara mempercepat proses berikutnya. Kunci `FIRMS_MAP_KEY` opsional melalui repository secret. Tanpa secret, jalur unduhan publik tetap berjalan. Repo harus mengizinkan Actions dengan `contents: write`; proteksi branch dapat menolak push bot dan harus disesuaikan pemilik.
 
 File snapshot publik akan memiliki riwayat Git jika cron melakukan commit rutin. Pantau ukuran repositori dan kuota Actions/cache. Ini solusi awal untuk data tujuh hari, bukan arsip jangka panjang. Skala besar lebih tepat memakai penyimpanan objek atau layanan data tersendiri. Jangan mempublikasikan repositori induk lamaran.
 
@@ -36,11 +36,10 @@ Konfigurasi `wrangler.jsonc` memakai Worker `karhutla-watch` pada custom domain 
 ```powershell
 bunx --bun wrangler login
 $env:VITE_DATA_URL = 'https://raw.githubusercontent.com/ramaikn/karhutla-watch/main/public/data/latest.json'
-$env:VITE_AIR_DATA_URL = 'https://raw.githubusercontent.com/ramaikn/karhutla-watch/main/public/data/air-quality.json'
 bun run deploy
 ```
 
-Kedua URL hanya berisi data publik. Pengaturan ini membuat pembaruan snapshot oleh Actions terlihat tanpa deployment ulang kode. Jangan menjalankan `wrangler deploy` pada fork tanpa menyesuaikan akun/domain.
+URL hanya berisi data publik. `rankings.json` dan `news.json` otomatis diambil dari direktori yang sama dengan `latest.json`. Pengaturan ini membuat pembaruan snapshot oleh Actions terlihat tanpa deployment ulang kode. Jangan menjalankan `wrangler deploy` pada fork tanpa menyesuaikan akun/domain.
 
 Untuk hosting statis:
 
@@ -57,7 +56,9 @@ Pilihan awal tanpa mengubah backend: isi variabel build `VITE_DATA_URL` dengan U
 VITE_DATA_URL=https://raw.githubusercontent.com/PEMILIK/REPOSITORI/BRANCH/public/data/latest.json
 ```
 
-Ganti placeholder dengan repositori publik dan branch sebenarnya. URL harus mendukung CORS, HTTPS, dan tidak mengandung rahasia. Browser mengambil data utama langsung dari URL tersebut; cron mengubah snapshot tanpa perlu membangun ulang bundle web. Gunakan `VITE_AIR_DATA_URL` untuk snapshot udara terpisah. Tanpa variabel ini, udara memakai `data/air-quality.json` pada hosting web. Cache CDN sumber dapat menunda kemunculan data baru. Jangan menganggap waktu cron sebagai waktu pengamatan satelit.
+Ganti placeholder dengan repositori publik dan branch sebenarnya. URL harus mendukung CORS, HTTPS, dan tidak mengandung rahasia. Browser mengambil data utama serta berkas ringan dari direktori tersebut; cron mengubah snapshot tanpa perlu membangun ulang bundle web. Udara sudah masuk `rankings.json`, jadi `VITE_AIR_DATA_URL` tidak diperlukan. Cache CDN sumber dapat menunda kemunculan data baru. Jangan menganggap waktu cron sebagai waktu pengamatan satelit.
+
+Untuk membuat ulang berkas ringan dari snapshot lokal tanpa memanggil sumber, jalankan `bun run prepare:data`. Collector memanggil proses yang sama sebelum menerbitkan snapshot. Ranking menghitung semua kombinasi filter pada waktu snapshot, sehingga browser cukup memilih tabel yang sudah tersedia.
 
 Untuk pola ini, batasi auto-build Cloudflare agar perubahan hanya pada `public/data/` tidak memicu build. Pengaturan tersebut harus dilakukan pemilik saat hosting. GitHub raw tetap memiliki keterbatasan layanan dan bukan penyedia data tanpa batas. Jika traffic membesar, pindahkan snapshot ke penyimpanan statis yang sesuai, lalu ganti `VITE_DATA_URL`.
 

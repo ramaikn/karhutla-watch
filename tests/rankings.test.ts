@@ -2,6 +2,9 @@ import { expect, test } from "bun:test";
 import { assignProvinces, normalizeAir, rankAir, rankFires, validateProvinces, type Province } from "../src/domain/rankings";
 import type { Hotspot } from "../src/domain/types";
 import { layout } from "../src/ui/layout";
+import { buildRankings } from "../scripts/prepare-data";
+import { decodeSnapshot } from "../src/domain/snapshot";
+import { rankingKey, validateRankingSnapshot } from "../src/domain/ranking-snapshot";
 
 const now = Date.parse("2026-10-13T00:00:00Z");
 const province = (code: string, x: number): Province => ({ code, name: `Provinsi ${code}`, latitude: 0.5, longitude: x + 0.5, bounds: [x, 0, x + 1, 1], geometry: { type: "Polygon", coordinates: [[[x, 0], [x + 1, 0], [x + 1, 1], [x, 1], [x, 0]]] } });
@@ -40,4 +43,22 @@ test("udara memvalidasi koordinat, waktu, satuan dan mengurutkan PM2.5 dengan ni
 test("panel peringkat ada dan catatan teknis dipindah keluar antarmuka", () => {
   expect(layout).toContain('data-panel="ranking"'); expect(layout).toContain('id="air-ranking"');
   expect(layout).not.toMatch(/Mengikuti filter peta|sensor yang gagal|bukan prediksi|bukan berarti aman|Jendela penyimpanan|Waktu indeks bukan/);
+});
+
+test("workflow menyiapkan 36 kombinasi filter tanpa geometri atau deteksi mentah", async () => {
+  const index: unknown = await Bun.file("public/data/provinces.json").json(); validateProvinces(index);
+  const snapshot = decodeSnapshot(await Bun.file("public/data/latest.json").json());
+  snapshot.generatedAt = new Date(now).toISOString();
+  snapshot.hotspots = [point("a", 113.92, 20, "h"), point("b", 113.92, 8)];
+  snapshot.hotspots.forEach((p) => { p.latitude = -2.21; });
+  const data = buildRankings(snapshot, index, null);
+  validateRankingSnapshot(data);
+  expect(Object.keys(data.fires)).toHaveLength(36);
+  const key = rankingKey({ hours: 24, confidence: "reliable", sensor: "all" });
+  expect(data.fires[key][0]).toMatchObject({ code: "62", count: 2, high: 1, maxFrp: 20 });
+  expect(data.fires[rankingKey({ hours: 24, confidence: "h", sensor: "all" })][0].count).toBe(1);
+  expect(data.fires[rankingKey({ hours: 24, confidence: "all", sensor: "VIIRS_SNPP_NRT" })].every((r) => r.count === 0)).toBe(true);
+  expect(JSON.stringify(data)).not.toMatch(/geometry|observedAt|coordinates/);
+  expect(() => validateRankingSnapshot({ ...data, fires: {} })).toThrow();
+  expect(() => validateRankingSnapshot({ ...data, air: [{ pm25: -1 }] })).toThrow();
 });

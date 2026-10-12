@@ -3,13 +3,15 @@ import "./style.css";
 import { layout } from "./ui/layout";
 import type { HotspotMap } from "./ui/map";
 import { element, formatDate, numberFormat } from "./ui/dom";
-import { renderDetections, renderNews, renderTrend } from "./ui/panels";
+import { renderDetections, renderTrend } from "./ui/panels";
 import { effectiveStatus, filterHotspots, REGIONS } from "./domain/filters";
 import { SENSORS, type Filters, type Snapshot } from "./domain/types";
 import { decodeSnapshot } from "./domain/snapshot";
 import { initializeWorkspace } from "./ui/workspace";
 import { WeatherSearch } from "./ui/weather-search";
 import { RankingPanel } from "./ui/ranking-panel";
+import { NewsPanel } from "./ui/news-panel";
+import { dataUrl } from "./domain/data-url";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = layout;
 function node<T extends HTMLElement = HTMLElement>(id: string): T { return document.getElementById(id) as T; }
@@ -18,10 +20,11 @@ let map: HotspotMap | null = null;
 let mode: "points" | "heatmap" = "points";
 let loading = false;
 let mapFingerprint = "";
-const dataUrl = import.meta.env.VITE_DATA_URL || `${import.meta.env.BASE_URL}data/latest.json`;
+const snapshotUrl = dataUrl("latest.json");
 const filters: Filters = { hours: 24, region: "all", confidence: "reliable", sensor: "all" };
 const weatherSearch = new WeatherSearch();
 const rankingPanel = new RankingPanel(() => map);
+const newsPanel = new NewsPanel();
 for (const region of REGIONS) { const option = element("option", "", region.name); option.value = region.id; node<HTMLSelectElement>("region").append(option); }
 async function initializeMap(): Promise<void> {
   try {
@@ -45,7 +48,7 @@ function render(): void {
   const fingerprint = `${snapshot.generatedAt}:${JSON.stringify(filters)}:${points.length}:${points[0]?.id ?? ""}`;
   if (map && fingerprint !== mapFingerprint) { map.update(points); mapFingerprint = fingerprint; }
   node("count").textContent = available ? numberFormat.format(points.length) : "—";
-  rankingPanel.update(snapshot, filters);
+  rankingPanel.update(filters);
   node("high-count").textContent = available ? numberFormat.format(points.filter((point) => point.confidence === "h").length) : "—";
   node("latest-observation").textContent = points.length ? formatDate(points[0].observedAt) : "Belum tersedia";
   const empty = node("map-empty");
@@ -54,7 +57,7 @@ function render(): void {
   node<HTMLButtonElement>("download").disabled = !points.length;
   renderDetections(node("detection-list"), points, available, (point) => map?.show(point));
   renderTrend(node("trend-chart"), filterHotspots(snapshot.hotspots, { ...filters, hours: 168 }), available);
-  renderNews(node("news-list"), snapshot.articles, node<HTMLInputElement>("news-search").value);
+  newsPanel.seed(snapshot.articles, snapshot.generatedAt);
   node("updated").textContent = `Data: ${formatDate(snapshot.generatedAt)}`;
 }
 
@@ -75,7 +78,7 @@ async function load(): Promise<void> {
   loading = true;
   const button = node<HTMLButtonElement>("reload"); button.disabled = true; button.textContent = "Memuat…";
   try {
-    const response = await fetch(dataUrl, { cache: "no-cache", signal: AbortSignal.timeout(30_000) });
+    const response = await fetch(snapshotUrl, { cache: "no-cache", signal: AbortSignal.timeout(30_000) });
     if (!response.ok) throw new Error("Berkas data tidak dapat dimuat. Coba lagi saat koneksi tersedia.");
     const raw: unknown = await response.json();
     if (snapshot && raw && typeof raw === "object" && (raw as { generatedAt?: string }).generatedAt === snapshot.generatedAt) return;
@@ -113,13 +116,11 @@ node("filters").addEventListener("change", () => {
   filters.region = node<HTMLSelectElement>("region").value;
   filters.confidence = node<HTMLSelectElement>("confidence").value as Filters["confidence"];
   filters.sensor = node<HTMLSelectElement>("sensor").value as Filters["sensor"];
+  rankingPanel.update(filters);
   if (oldRegion !== filters.region) map?.fit(filters.region);
   render();
 });
-node("news-search").addEventListener("input", () => {
-  if (snapshot) renderNews(node("news-list"), snapshot.articles, node<HTMLInputElement>("news-search").value);
-});
-node("reload").addEventListener("click", () => void load());
+node("reload").addEventListener("click", () => { void load(); void rankingPanel.load(true); void newsPanel.load(); });
 node("download").addEventListener("click", () => {
   if (!snapshot) return;
   const rows = [["latitude", "longitude", "observed_at_utc", "sensor", "confidence", "frp_mw", "source"],
@@ -133,4 +134,4 @@ initializeWorkspace(() => map);
 void load();
 void initializeMap();
 // Hitungan waktu dan status kedaluwarsa tetap benar jika tab dibiarkan terbuka.
-setInterval(() => { render(); void load(); }, 60_000);
+setInterval(() => { render(); void load(); void rankingPanel.load(); void newsPanel.load(); }, 60_000);

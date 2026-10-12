@@ -8,6 +8,7 @@ import { fetchNews } from "./news";
 import { fetchPublicFirms } from "./firms";
 import { decodeSnapshot, encodeSnapshot } from "../src/domain/snapshot";
 import { collectAir } from "./air-quality";
+import { prepareData } from "./prepare-data";
 
 const root = resolve(import.meta.dir, "..");
 const filePath = resolve(root, "public/data/latest.json");
@@ -127,6 +128,7 @@ try {
       next.hotspots = mergeHotspots(previous.hotspots, [], now.getTime());
       await Promise.all([collectFirms(), collectNews(), collectWeather(), collectAir(root).catch((error) => console.error("Udara gagal diperbarui; snapshot lama dipertahankan.", errorMessage(error)))]);
     }
+  await prepareData(root, next);
   const tempPath = `${filePath}.next`;
   await Bun.write(tempPath, JSON.stringify(encodeSnapshot(next)));
   await rename(tempPath, filePath);

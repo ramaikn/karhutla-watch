@@ -88,7 +88,10 @@ export class WeatherSearch {
     } catch (error) {
       if (selection !== this.selection || controller.signal.aborted) return;
       console.error("Prakiraan BMKG", error);
-      this.content.replaceChildren(element("p", "empty-state", "Prakiraan belum tersedia untuk lokasi ini. Coba lagi sebentar atau pilih lokasi lain."));
+      const message = error instanceof Error && error.message.startsWith("Prakiraan") ? error.message : "Prakiraan belum dapat dimuat. Coba lagi.";
+      const retry = element("button", "", "Coba lagi"); retry.type = "button";
+      retry.addEventListener("click", () => void this.choose(location));
+      this.content.replaceChildren(element("p", "empty-state", message), retry);
     }
   }
 }

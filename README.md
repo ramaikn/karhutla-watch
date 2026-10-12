@@ -49,6 +49,7 @@ Kunci NASA opsional. Jika diperlukan, salin `.env.example` menjadi `.env`, lalu 
 | `bun run dev` | Web dan collector berkala |
 | `bun run collect` | Perbarui deteksi, berita, cuaca cadangan, dan udara |
 | `bun run collect:news` | Perbarui berita saja |
+| `bun run prepare:data` | Hitung ulang ranking dan berita siap tampil dari snapshot lokal |
 | `bun run collect:air` | Perbarui kualitas udara saja |
 | `bun test` | Pengujian alur penting |
 | `bun run build` | Periksa TypeScript dan buat build produksi |
@@ -77,6 +78,8 @@ Proyek ini bukan layanan tanggap darurat. Untuk informasi resmi, gunakan [BMKG](
 ## Deployment
 
 Build menghasilkan folder `dist` yang dihosting dengan Cloudflare Workers Static Assets. Worker Cloudflare penjadwal terpisah dapat memicu GitHub Actions dua kali per jam; antrean Actions tetap berlaku. Tidak ada jadwal bawaan GitHub agar pemicu tidak ganda. Jadwal dinonaktifkan sampai token khusus tersedia sebagai Cloudflare Secret. Kunci NASA opsional disimpan sebagai Actions secret, bukan file publik. Lihat [panduan deployment](docs/DEPLOY.md) dan [pengaturan Cloudflare Cron](docs/CRON.md).
+
+Collector menyiapkan 36 kombinasi filter ranking dan berkas berita terpisah. Browser memuat keduanya paralel dengan data peta, kemudian memeriksa pembaruan setiap menit tanpa mengosongkan data yang sudah tampil. Perhitungan batas provinsi tidak lagi dilakukan di perangkat pengguna.
 
 API gratis Open-Meteo ditujukan untuk penggunaan nonkomersial. Penggunaan komersial perlu memeriksa paket dan ketentuan sumber walaupun kode aplikasi berlisensi Apache-2.0.
 

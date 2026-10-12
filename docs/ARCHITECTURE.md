@@ -4,9 +4,9 @@
 
 1. `scripts/collect.ts` memanggil sumber, mempertahankan data lama ketika sumber gagal, dan menyimpan snapshot atomik. Kunci hanya dipakai collector.
 2. `public/data/latest.json` memuat deteksi, berita, cuaca cadangan, serta status internal. `src/domain/snapshot.ts` menangani format ringkas dan kompatibilitas.
-3. `src/main.ts` mengambil snapshot, menerapkan filter, dan memperbarui panel/peta setiap menit. Frontend tidak menampilkan laporan teknis collector.
+3. `src/main.ts` mengambil snapshot peta, menerapkan filter, dan memeriksa pembaruan setiap menit. Ranking serta berita dimuat paralel tanpa menunggu snapshot peta. Frontend tidak menampilkan laporan teknis collector.
 4. Cuaca pilihan diambil browser langsung dari BMKG. Pencarian wilayah hanya membaca indeks lokal.
-5. Udara disimpan terpisah dalam `public/data/air-quality.json`. Pengelompokan deteksi ke provinsi dilakukan worker agar peta tidak tersendat.
+5. `scripts/prepare-data.ts` mengelompokkan deteksi ke 38 provinsi dan menghitung 36 kombinasi waktu/keyakinan/satelit di collector. `rankings.json` memuat hasil serta udara terurut; `news.json` memuat berita siap tampil. Browser tidak mengunduh poligon atau menghitung pengelompokan.
 
 ## Lokasi kode
 
@@ -15,8 +15,8 @@
 | `src/ui/layout.ts`, `src/style.css`, `src/ui/workspace.ts` | Tampilan map-first, panel kiri, berita kanan/mobile, fokus keyboard |
 | `src/ui/map.ts`, `src/ui/basemap.ts` | MapLibre, OSM tanpa kunci, titik/heatmap/popup |
 | `src/domain/filters.ts`, `normalize.ts`, `snapshot.ts`, `heatmap.ts` | Validasi dan pengolahan data |
-| `src/domain/rankings.ts`, `ranking-worker.ts` | Point-in-polygon, peringkat deteksi dan PM2.5 |
-| `src/ui/ranking-panel.ts` | Memuat batas provinsi dan udara, tabel serta fokus peta |
+| `src/domain/rankings.ts`, `ranking-snapshot.ts`, `scripts/prepare-data.ts` | Point-in-polygon pada collector, 36 tabel siap tampil, validasi hasil |
+| `src/ui/ranking-panel.ts`, `news-panel.ts`, `src/domain/data-url.ts` | Panel ringan paralel, pembaruan tanpa mengosongkan data lama, URL mengikuti sumber snapshot |
 | `src/domain/locations.ts`, `weather-client.ts`, `src/ui/weather-search.ts` | Pencarian nasional, cache BMKG dan pembatalan permintaan |
 | `scripts/news.ts`, `news-transport.ts`, `config/news-sources.ts` | Query identik 25 media, cache, retensi, deduplikasi dan cooldown |
 | `scripts/boundary.ts` | Batas nasional geoBoundaries untuk menyaring deteksi |
@@ -33,6 +33,9 @@
 
 - Semua media menggunakan Google News RSS per penerbit; tidak ada jalur khusus ANTARA. Urutan tampilan murni waktu terbit, tanpa kuota penerbit.
 - Peringkat deteksi nasional mengikuti waktu/keyakinan/satelit, bukan kotak wilayah peta. Deteksi di luar poligon tidak ditebak sebagai provinsi terdekat.
+- Jendela waktu ranking berakhir pada waktu snapshot collector, bukan jam browser. Tanggal snapshot ditampilkan agar hasil yang statis tidak diklaim sebagai hitungan langsung. Filter peta tetap memakai waktu browser.
+- `VITE_DATA_URL` menjadi dasar URL `rankings.json` dan `news.json`; ketiganya diperbarui pada commit data yang sama. `VITE_AIR_DATA_URL` tidak lagi dipakai panel ranking karena udara sudah digabung dalam hasil collector.
+- Cuaca memakai pembungkus `globalThis.fetch`, bukan metode instance yang menyebabkan `Illegal invocation` di browser. Pergantian cepat menunggu jeda permintaan dan mendukung pembatalan.
 - Udara diurutkan menurut PM2.5, bukan AQI campuran. Model pada titik acuan sumber tidak diklaim sebagai rata-rata provinsi.
 - Batas provinsi menggunakan sumber 38 provinsi, bukan geoBoundaries ADM1 lama yang hanya berisi 34.
 - Pesan kegagalan pengguna singkat tetap diperlukan. Penjelasan teknis, batasan interpretasi, dan metode berada di dokumentasi.
@@ -40,6 +43,8 @@
 - Jangan menaruh rahasia pada `VITE_*`. `.runtime` dan `.env*` bukan berkas publik.
 
 ## Pemeriksaan terakhir
+
+13 Oktober 2026, perbaikan pemuatan: 32 test/233 pemeriksaan, TypeScript, build produksi, dan `git diff --check` berhasil. `prepare:data` menghasilkan 36 tabel dalam sekitar 15 detik di mesin lokal; pekerjaan tersebut sekarang milik collector. Ranking sekitar 227 KB, dibanding poligon provinsi sekitar 4,6 MB yang dahulu diunduh panel. Ini perbandingan ukuran mentah, bukan pengukuran latensi jaringan. Browser lokal menampilkan 38 baris pada setiap tabel dan prakiraan BMKG Kemayoran 28°C beserta delapan waktu prakiraan tanpa page error. Produksi sebelumnya mereproduksi `Illegal invocation`; perubahan ini belum dipublikasikan atau dideploy. Build masih memberi peringatan ukuran MapLibre, yang sudah dimuat terpisah dari panel.
 
 26 pengujian dengan 209 pemeriksaan berhasil; TypeScript dan build produksi berhasil. Data batas memuat 38 provinsi; pengelompokan Palangka Raya, Sorong, dan Merauke diuji. Snapshot udara nyata berhasil untuk 38 titik acuan.
 
