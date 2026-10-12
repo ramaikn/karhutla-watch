@@ -2,6 +2,8 @@ name: Perbarui data Karhutla Watch
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '17,47 * * * *'
 
 permissions:
   contents: write
@@ -12,6 +14,8 @@ concurrency:
 
 jobs:
   refresh:
+    # Cadangan tetap berjalan sampai secret Cloudflare siap.
+    if: github.event_name != 'schedule' || vars.CLOUDFLARE_CRON_ENABLED != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
