@@ -15,13 +15,13 @@ Jangan menjalankan dua collector bersamaan. Proses memiliki penguncian dan menul
 
 ## Cloudflare Cron → GitHub Actions
 
-Workflow tersedia di `.github/workflows/refresh-data.yml` dengan pemicu `workflow_dispatch`. Jadwal diatur pada Worker Cloudflare terpisah, bukan pada `schedule` GitHub:
+Workflow tersedia di `.github/workflows/refresh-data.yml` dengan pemicu `workflow_dispatch`. Worker Cloudflare terpisah menjadi penjadwal utama; `schedule` GitHub menjadi cadangan sampai repository variable `CLOUDFLARE_CRON_ENABLED=true` tersedia:
 
 ```yaml
 cron: '17,47 * * * *'
 ```
 
-Artinya menit 17 dan 47 setiap jam UTC. Worker mengirim POST ke API GitHub; collector tetap terkena antrean Actions. Respons diterima bukan jaminan eksekusi atau keberhasilan collector. Lihat [CRON.md](CRON.md) untuk secret dengan cakupan minimum dan cara memeriksa hasil. Jadwal belum aktif sebelum secret tersedia dan konfigurasi cron diaktifkan.
+Artinya menit 17 dan 47 setiap jam UTC. Worker mengirim POST ke API GitHub; collector tetap terkena antrean Actions. Respons diterima bukan jaminan eksekusi atau keberhasilan collector. Lihat [CRON.md](CRON.md) untuk secret dengan cakupan minimum dan cara memeriksa hasil. Konfigurasi cron sudah tersedia, tetapi pembaruan otomatis baru berhasil setelah secret `GITHUB_ACTIONS_TOKEN` terpasang pada Worker.
 
 GitHub membaca `.github/workflows` di root repositori Karhutla Watch. Fork perlu mengaktifkan Actions dan menyesuaikan konfigurasi Worker dengan akun, repositori, serta token sendiri.
 

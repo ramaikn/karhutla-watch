@@ -12,7 +12,8 @@
 
 | Modul | Tanggung jawab |
 | --- | --- |
-| `src/ui/layout.ts`, `src/style.css`, `src/ui/workspace.ts` | Tampilan map-first, panel kiri, berita kanan/mobile, fokus keyboard |
+| `src/ui/layout.ts`, `src/style.css`, `src/ui/workspace.ts`, `workspace-state.ts` | Desktop: panel terpisah. Mobile: satu panel di bawah peta, tab dan navigasi keyboard. Tinggi header diukur dengan ResizeObserver |
+| `src/ui/about.ts` | Dialog About native, tautan proyek/profil, penutupan dan pemulihan fokus |
 | `src/ui/map.ts`, `src/ui/basemap.ts` | MapLibre, OSM tanpa kunci, titik/heatmap/popup |
 | `src/domain/filters.ts`, `normalize.ts`, `snapshot.ts`, `heatmap.ts` | Validasi dan pengolahan data |
 | `src/domain/rankings.ts`, `ranking-snapshot.ts`, `scripts/prepare-data.ts` | Point-in-polygon pada collector, 36 tabel siap tampil, validasi hasil |
@@ -25,6 +26,7 @@
 | `scripts/dev.ts` | Server web dan collector 30 menit |
 | `config/weather-locations.json` | Empat lokasi cache cadangan, bukan batas pencarian web |
 | `tests/` | Regresi domain, cuaca nasional, dan peringkat |
+| `scripts/check-browser.ts` | Pemeriksaan Chrome melalui CDP pada 320–1440 piksel, panel mobile, posisi header dan dialog About |
 | `.github/workflows/` | Pemeriksaan kode dan pembaruan data |
 | `scheduler/`, `docs/CRON.md` | Cloudflare Cron memicu workflow_dispatch, secret terpisah, tanpa endpoint publik |
 | `wrangler.jsonc` | Workers Static Assets pada karhutla.my.id; URL data publik diatur saat build |
@@ -43,6 +45,10 @@
 - Jangan menaruh rahasia pada `VITE_*`. `.runtime` dan `.env*` bukan berkas publik.
 
 ## Pemeriksaan terakhir
+
+13 Oktober 2026, pembaruan mobile dan About: 36 test dengan 249 pemeriksaan, TypeScript dan build berhasil. Chrome headless memeriksa lebar 320, 390, 700, 768, 1024, dan 1440 piksel: tidak ada overflow horizontal, kartu deteksi di bawah header, satu panel mobile di bawah peta, serta dialog terpusat yang mengembalikan fokus saat ditutup. Screenshot berada di `.runtime/ui-check/`. Pemeriksaan otomatis memakai Chrome terpisah karena viewport panel browser aplikasi tidak selalu mengubah lebar halaman sebenarnya. Ini belum pengujian perangkat fisik pengguna.
+
+Situs dideploy ke `https://karhutla.my.id` dengan snapshot GitHub raw, versi Worker `a4a472bb-3865-45c6-b684-8a5bb14228ee`. Worker penjadwal dideploy dengan Cron `17,47 * * * *`, tetapi secret `GITHUB_ACTIONS_TOKEN` belum tersedia. Login browser GitHub diperlukan untuk membuat token fine-grained; token CLI yang lebih luas tidak disalin. Jadwal cadangan GitHub sudah diterbitkan dan workflow pembaruan manual dipicu. Jangan set `CLOUDFLARE_CRON_ENABLED=true` sebelum pemicu Cloudflare berhasil. Cuaca lokasi pilihan diperiksa setiap menit dan cache BMKG berakhir setelah 30 menit.
 
 13 Oktober 2026, perbaikan pemuatan: 32 test/233 pemeriksaan, TypeScript, build produksi, dan `git diff --check` berhasil. `prepare:data` menghasilkan 36 tabel dalam sekitar 15 detik di mesin lokal; pekerjaan tersebut sekarang milik collector. Ranking sekitar 227 KB, dibanding poligon provinsi sekitar 4,6 MB yang dahulu diunduh panel. Ini perbandingan ukuran mentah, bukan pengukuran latensi jaringan. Browser lokal menampilkan 38 baris pada setiap tabel dan prakiraan BMKG Kemayoran 28°C beserta delapan waktu prakiraan tanpa page error. Produksi sebelumnya mereproduksi `Illegal invocation`; perubahan ini belum dipublikasikan atau dideploy. Build masih memberi peringatan ukuran MapLibre, yang sudah dimuat terpisah dari panel.
 

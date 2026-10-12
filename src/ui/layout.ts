@@ -1,9 +1,12 @@
+import { aboutDialog } from "./about";
+
 export const layout = `
 <main class="workspace">
   <section id="peta" class="map-stage" aria-label="Peta titik panas Indonesia">
     <div id="map" role="region" aria-label="Peta interaktif deteksi titik panas Indonesia"></div>
     <header class="map-toolbar surface">
       <a class="brand" href="#peta" aria-label="Karhutla Watch, peta"><img src="./favicon.svg" alt="" width="24" height="24"><span>Karhutla <strong>Watch</strong></span></a>
+      <button id="open-about" type="button" aria-haspopup="dialog" aria-controls="about-dialog">About</button>
       <form id="filters" class="filters">
         <select id="region" aria-label="Wilayah peta"></select>
         <select id="hours" aria-label="Rentang waktu"><option value="24">24 jam</option><option value="72">3 hari</option><option value="168">7 hari</option></select>
@@ -12,7 +15,7 @@ export const layout = `
           <label>Satelit<select id="sensor"><option value="all">Semua VIIRS</option><option value="VIIRS_NOAA20_NRT">NOAA-20</option><option value="VIIRS_NOAA21_NRT">NOAA-21</option><option value="VIIRS_SNPP_NRT">S-NPP</option></select></label>
         </div></details>
       </form>
-      <nav aria-label="Panel peta">
+      <nav id="panel-navigation" aria-label="Panel peta">
         <button type="button" data-panel="ranking" aria-controls="ranking-panel" aria-expanded="false">Peringkat</button>
         <button type="button" data-panel="detections" aria-controls="detections-panel" aria-expanded="false">Deteksi</button>
         <button type="button" data-panel="weather" aria-controls="weather-panel" aria-expanded="false">Cuaca</button>
@@ -66,4 +69,5 @@ export const layout = `
     <div class="news-scroll"><div id="news-list"></div><div class="official-links"><a href="https://www.bnpb.go.id/berita" target="_blank" rel="noopener noreferrer">BNPB ↗</a><a href="https://sipongi.gakkum.kehutanan.go.id/" target="_blank" rel="noopener noreferrer">SiPongi ↗</a></div></div>
   </aside>
 </main>
+${aboutDialog}
 `;

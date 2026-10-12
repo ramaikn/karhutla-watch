@@ -15,6 +15,8 @@ export class WeatherSearch {
   private timer: ReturnType<typeof setTimeout> | undefined;
   private request: AbortController | null = null;
   private selection = 0;
+  private selectedLocation: SearchLocation | null = null;
+  private refreshing = false;
 
   constructor() {
     this.input.addEventListener("input", () => {
@@ -37,6 +39,17 @@ export class WeatherSearch {
   }
 
   seed(locations: WeatherLocation[]): void { this.client.seed(locations); }
+
+  async refresh(): Promise<void> {
+    if (!this.selectedLocation || this.refreshing || this.request && !this.request.signal.aborted) return;
+    this.refreshing = true;
+    const selection = this.selection;
+    try {
+      const forecast = await this.client.get(this.selectedLocation.code, new AbortController().signal);
+      if (selection === this.selection) renderWeather(this.content, forecast);
+    } catch { /* Prakiraan yang sudah tampil dipertahankan saat sumber gagal. */ }
+    finally { this.refreshing = false; }
+  }
 
   private loadIndex(): Promise<void> {
     if (this.locations) return Promise.resolve();
@@ -75,6 +88,7 @@ export class WeatherSearch {
 
   private async choose(location: SearchLocation): Promise<void> {
     const selection = ++this.selection;
+    this.selectedLocation = location;
     this.request?.abort();
     const controller = new AbortController(); this.request = controller;
     clearTimeout(this.timer);
@@ -93,5 +107,6 @@ export class WeatherSearch {
       retry.addEventListener("click", () => void this.choose(location));
       this.content.replaceChildren(element("p", "empty-state", message), retry);
     }
+    finally { if (this.request === controller) this.request = null; }
   }
 }

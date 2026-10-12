@@ -134,4 +134,4 @@ initializeWorkspace(() => map);
 void load();
 void initializeMap();
 // Hitungan waktu dan status kedaluwarsa tetap benar jika tab dibiarkan terbuka.
-setInterval(() => { render(); void load(); void rankingPanel.load(); void newsPanel.load(); }, 60_000);
+setInterval(() => { render(); void load(); void rankingPanel.load(); void newsPanel.load(); void weatherSearch.refresh(); }, 60_000);

@@ -6,7 +6,7 @@
   "compatibility_date": "2026-10-12",
   "workers_dev": false,
   "preview_urls": false,
-  "triggers": { "crons": [] },
+  "triggers": { "crons": ["17,47 * * * *"] },
   "vars": {
     "GITHUB_REPOSITORY": "ramaikn/karhutla-watch",
     "GITHUB_WORKFLOW": "refresh-data.yml",

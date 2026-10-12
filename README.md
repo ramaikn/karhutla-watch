@@ -17,7 +17,7 @@ Peta interaktif titik panas Indonesia, peringkat provinsi, kualitas udara, berit
 - **Berita dari 25 media.** Setiap media memakai pencarian, rentang waktu, dan batas hasil yang sama. Artikel terbaru tampil paling atas, dengan pencarian judul atau penerbit.
 - **Cuaca seluruh Indonesia.** Cari di antara 83.762 desa/kelurahan pada 38 provinsi, lalu buka prakiraan resmi BMKG untuk lokasi pilihan.
 - **Filter dan ekspor.** Rentang 24 jam, 3 hari, atau 7 hari; wilayah, keyakinan, dan satelit; daftar deteksi, tren, serta unduhan CSV.
-- **Responsif.** Berita dapat ditutup di desktop dan berada di bawah peta pada ponsel. Panel tambahan muncul di kiri.
+- **Responsif.** Desktop memiliki panel detail di kiri dan berita di kanan. Pada ponsel, tab mengganti satu panel di bawah peta tanpa menutup peta. Dialog About tersedia di kedua versi.
 - **Tanpa API AI berbayar.** Web dapat dihosting statis. Collector memperbarui snapshot secara terpisah.
 
 ## Jalankan lokal
@@ -77,7 +77,7 @@ Proyek ini bukan layanan tanggap darurat. Untuk informasi resmi, gunakan [BMKG](
 
 ## Deployment
 
-Build menghasilkan folder `dist` yang dihosting dengan Cloudflare Workers Static Assets. Worker Cloudflare penjadwal terpisah dapat memicu GitHub Actions dua kali per jam; antrean Actions tetap berlaku. Tidak ada jadwal bawaan GitHub agar pemicu tidak ganda. Jadwal dinonaktifkan sampai token khusus tersedia sebagai Cloudflare Secret. Kunci NASA opsional disimpan sebagai Actions secret, bukan file publik. Lihat [panduan deployment](docs/DEPLOY.md) dan [pengaturan Cloudflare Cron](docs/CRON.md).
+Build menghasilkan folder `dist` yang dihosting dengan Cloudflare Workers Static Assets. Worker Cloudflare penjadwal terpisah memicu GitHub Actions setiap 30 menit; antrean Actions tetap berlaku. Penjadwal memerlukan token khusus sebagai Cloudflare Secret `GITHUB_ACTIONS_TOKEN`. Jadwal GitHub menjadi cadangan sampai repository variable `CLOUDFLARE_CRON_ENABLED=true` dipasang setelah secret Cloudflare siap. Kunci NASA opsional disimpan sebagai Actions secret, bukan file publik. Lihat [panduan deployment](docs/DEPLOY.md) dan [pengaturan Cloudflare Cron](docs/CRON.md).
 
 Collector menyiapkan 36 kombinasi filter ranking dan berkas berita terpisah. Browser memuat keduanya paralel dengan data peta, kemudian memeriksa pembaruan setiap menit tanpa mengosongkan data yang sudah tampil. Perhitungan batas provinsi tidak lagi dilakukan di perangkat pengguna.
 
@@ -91,8 +91,6 @@ Peta kode dan alur data tersedia di [arsitektur](docs/ARCHITECTURE.md).
 
 ## Lisensi dan atribusi
 
-Copyright © 2026 **AM Fathur Ramadhan**.
-
-Kode asli tersedia di bawah [Apache License 2.0](LICENSE). Saat mendistribusikan fork atau proyek turunan, sertakan lisensi serta pertahankan pemberitahuan hak cipta dan atribusi relevan dalam [NOTICE](NOTICE), sesuai ketentuan Apache-2.0. Tidak wajib mencantumkan nama di antarmuka.
+Kode tersedia di bawah [Apache License 2.0](LICENSE). Saat mendistribusikan fork atau proyek turunan, sertakan lisensi dan atribusi pihak ketiga yang relevan dalam [NOTICE](NOTICE).
 
 Lisensi kode tidak menggantikan lisensi data dan dependensi. Atribusi NASA, BMKG, OpenStreetMap, CAMS/Open-Meteo, dan kontributor data wilayah tetap berlaku.

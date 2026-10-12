@@ -94,7 +94,8 @@ export class HotspotMap {
     const width = this.map.getContainer().clientWidth;
     const mobile = width <= 700;
     const right = !mobile && this.newsVisible ? (width <= 1000 ? 338 : 368) : 48;
-    this.map.fitBounds([[west, south], [east, north]], { padding: { top: mobile ? 155 : 125, left: 28, right, bottom: 88 }, duration: 0 });
+    const toolbarBottom = Number.parseFloat(getComputedStyle(document.querySelector(".workspace")!).getPropertyValue("--toolbar-bottom")) || 64;
+    this.map.fitBounds([[west, south], [east, north]], { padding: { top: Math.min(toolbarBottom + 64, this.map.getContainer().clientHeight * .5), left: 28, right, bottom: mobile ? 64 : 88 }, duration: 0 });
   }
 
   setNewsVisible(visible: boolean): void {

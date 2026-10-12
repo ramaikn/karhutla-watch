@@ -72,3 +72,16 @@ test("429 menunda permintaan berikutnya tanpa mengubah prakiraan menjadi data pa
   await expect(client.get("31.71.03.1002", signal)).rejects.toThrow();
   expect(calls).toBe(1);
 });
+
+test("cache prakiraan diperbarui setelah 30 menit", async () => {
+  let time = now, calls = 0;
+  const client = new WeatherClient(async () => { calls++; return new Response(JSON.stringify(payload("31.71.03.1001"))); }, () => time);
+  const signal = new AbortController().signal;
+  await client.get("31.71.03.1001", signal);
+  time += 29 * 60_000;
+  await client.get("31.71.03.1001", signal);
+  expect(calls).toBe(1);
+  time += 60_000;
+  await client.get("31.71.03.1001", signal);
+  expect(calls).toBe(2);
+});
