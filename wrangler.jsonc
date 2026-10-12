@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "karhutla-watch",
+  "account_id": "7cba2fd7ef4fdc0437a87ad443c6401b",
+  "compatibility_date": "2026-10-12",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./dist"
+  },
+  "routes": [
+    { "pattern": "karhutla.my.id", "custom_domain": true }
+  ]
+}

@@ -13,23 +13,34 @@ Untuk menjalankan web tanpa proses pembaruan, gunakan `bun run dev:web`. Untuk p
 
 Jangan menjalankan dua collector bersamaan. Proses memiliki penguncian dan menulis snapshot secara atomik. Jika proses dihentikan paksa, pastikan collector sudah mati sebelum menghapus `.runtime/collect.lock`. Kegagalan sumber mempertahankan data lama; diagnostik berada pada snapshot/log, bukan badge publik.
 
-## cron-job.org → GitHub Actions
+## Cloudflare Cron → GitHub Actions
 
-Workflow tersedia di `.github/workflows/refresh-data.yml` dengan pemicu `workflow_dispatch`. Jadwal diatur pada cron-job.org, bukan pada `schedule` GitHub:
+Workflow tersedia di `.github/workflows/refresh-data.yml` dengan pemicu `workflow_dispatch`. Jadwal diatur pada Worker Cloudflare terpisah, bukan pada `schedule` GitHub:
 
 ```yaml
 cron: '17,47 * * * *'
 ```
 
-Artinya menit 17 dan 47 setiap jam UTC. cron-job.org mengirim POST ke API GitHub; collector tetap terkena antrean Actions. Respons diterima bukan jaminan eksekusi atau keberhasilan collector. Lihat [CRON.md](CRON.md) untuk URL, body, header, token dengan cakupan minimum, dan cara memeriksa hasil. Job belum aktif sebelum pemilik mengaturnya pada akun cron-job.org.
+Artinya menit 17 dan 47 setiap jam UTC. Worker mengirim POST ke API GitHub; collector tetap terkena antrean Actions. Respons diterima bukan jaminan eksekusi atau keberhasilan collector. Lihat [CRON.md](CRON.md) untuk secret dengan cakupan minimum dan cara memeriksa hasil. Jadwal belum aktif sebelum secret tersedia dan konfigurasi cron diaktifkan.
 
-GitHub membaca `.github/workflows` di root repositori Karhutla Watch. Fork perlu mengaktifkan Actions dan membuat job sendiri dengan URL serta token untuk repositori fork.
+GitHub membaca `.github/workflows` di root repositori Karhutla Watch. Fork perlu mengaktifkan Actions dan menyesuaikan konfigurasi Worker dengan akun, repositori, serta token sendiri.
 
 Workflow melakukan pengujian, pengambilan data, build, dan commit `public/data/latest.json` serta `public/data/air-quality.json` ke branch default. Cache geometri negara mempercepat proses berikutnya. Kunci `FIRMS_MAP_KEY` opsional melalui repository secret. Tanpa secret, jalur unduhan publik tetap berjalan. Repo harus mengizinkan Actions dengan `contents: write`; proteksi branch dapat menolak push bot dan harus disesuaikan pemilik.
 
 File snapshot publik akan memiliki riwayat Git jika cron melakukan commit rutin. Pantau ukuran repositori dan kuota Actions/cache. Ini solusi awal untuk data tujuh hari, bukan arsip jangka panjang. Skala besar lebih tepat memakai penyimpanan objek atau layanan data tersendiri. Jangan mempublikasikan repositori induk lamaran.
 
-## Cloudflare nanti
+## Cloudflare Workers Static Assets
+
+Konfigurasi `wrangler.jsonc` memakai Worker `karhutla-watch` pada custom domain `karhutla.my.id`. Wrangler terpasang sebagai dependensi pengembangan. Untuk fork, ganti `account_id`, nama Worker, dan domain dengan milik sendiri sebelum deployment. Jangan menaruh token pada konfigurasi ini.
+
+```powershell
+bunx --bun wrangler login
+$env:VITE_DATA_URL = 'https://raw.githubusercontent.com/ramaikn/karhutla-watch/main/public/data/latest.json'
+$env:VITE_AIR_DATA_URL = 'https://raw.githubusercontent.com/ramaikn/karhutla-watch/main/public/data/air-quality.json'
+bun run deploy
+```
+
+Kedua URL hanya berisi data publik. Pengaturan ini membuat pembaruan snapshot oleh Actions terlihat tanpa deployment ulang kode. Jangan menjalankan `wrangler deploy` pada fork tanpa menyesuaikan akun/domain.
 
 Untuk hosting statis:
 
@@ -46,11 +57,11 @@ Pilihan awal tanpa mengubah backend: isi variabel build `VITE_DATA_URL` dengan U
 VITE_DATA_URL=https://raw.githubusercontent.com/PEMILIK/REPOSITORI/BRANCH/public/data/latest.json
 ```
 
-Ganti placeholder dengan repositori publik dan branch sebenarnya. URL harus mendukung CORS, HTTPS, dan tidak mengandung rahasia. Browser mengambil data utama langsung dari URL tersebut; cron mengubah snapshot tanpa perlu membangun ulang bundle web. Snapshot udara saat ini tetap berasal dari `data/air-quality.json` pada hosting web, sehingga perlu ikut disalin ketika deployment memperbarui data udara. `VITE_DATA_URL` tidak mengubah sumber udara. Cache CDN sumber dapat menunda kemunculan data baru. Jangan menganggap waktu cron sebagai waktu pengamatan satelit.
+Ganti placeholder dengan repositori publik dan branch sebenarnya. URL harus mendukung CORS, HTTPS, dan tidak mengandung rahasia. Browser mengambil data utama langsung dari URL tersebut; cron mengubah snapshot tanpa perlu membangun ulang bundle web. Gunakan `VITE_AIR_DATA_URL` untuk snapshot udara terpisah. Tanpa variabel ini, udara memakai `data/air-quality.json` pada hosting web. Cache CDN sumber dapat menunda kemunculan data baru. Jangan menganggap waktu cron sebagai waktu pengamatan satelit.
 
 Untuk pola ini, batasi auto-build Cloudflare agar perubahan hanya pada `public/data/` tidak memicu build. Pengaturan tersebut harus dilakukan pemilik saat hosting. GitHub raw tetap memiliki keterbatasan layanan dan bukan penyedia data tanpa batas. Jika traffic membesar, pindahkan snapshot ke penyimpanan statis yang sesuai, lalu ganti `VITE_DATA_URL`.
 
-Tanpa `VITE_DATA_URL`, web memakai `data/latest.json` dari hosting yang sama. Cocok untuk lokal atau deploy manual. Tidak ada akun Cloudflare, deploy hook, domain, atau publikasi yang dikonfigurasi pada sesi ini.
+Tanpa `VITE_DATA_URL`, web memakai `data/latest.json` dari hosting yang sama. Cocok untuk lokal atau deploy manual.
 
 ## Keamanan
 

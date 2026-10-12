@@ -26,7 +26,8 @@
 | `config/weather-locations.json` | Empat lokasi cache cadangan, bukan batas pencarian web |
 | `tests/` | Regresi domain, cuaca nasional, dan peringkat |
 | `.github/workflows/` | Pemeriksaan kode dan pembaruan data |
-| `docs/CRON.md` | cron-job.org memicu workflow_dispatch, tanpa schedule bawaan GitHub |
+| `scheduler/`, `docs/CRON.md` | Cloudflare Cron memicu workflow_dispatch, secret terpisah, tanpa endpoint publik |
+| `wrangler.jsonc` | Workers Static Assets pada karhutla.my.id; URL data publik diatur saat build |
 
 ## Keputusan penting
 
@@ -43,3 +44,7 @@
 26 pengujian dengan 209 pemeriksaan berhasil; TypeScript dan build produksi berhasil. Data batas memuat 38 provinsi; pengelompokan Palangka Raya, Sorong, dan Merauke diuji. Snapshot udara nyata berhasil untuk 38 titik acuan.
 
 Browser Chrome dengan SwiftShader berhasil merender basemap dan heatmap Kalimantan. Screenshot asli tersedia di `docs/images/kalimantan-heatmap.png`. Panel Peringkat menampilkan 38 baris deteksi dan 38 baris udara tanpa page error. Pada viewport 390 × 844, lebar dokumen tetap 390 piksel. Point-in-polygon awal pada main thread sempat membuat browser tidak merespons; pemindahan ke worker memperbaiki sumber hambatan tersebut. Pemeriksaan ini bukan verifikasi visual seluruh kombinasi filter/perangkat.
+
+Deployment Workers Static Assets berhasil pada `https://karhutla.my.id` dan `https://karhutla-watch.ramaiknx.workers.dev`. Browser produksi memuat snapshot deteksi serta udara dari GitHub raw dengan HTTP 200, menampilkan masing-masing 38 baris peringkat, tanpa page error. 26 pengujian dan build setelah penambahan Wrangler berhasil. CI GitHub publik juga berhasil. Penjadwalan beralih ke Cloudflare Cron; secret khusus masih perlu dipasang sebelum jadwal diaktifkan.
+
+Pengujian penjadwal menambah tiga test: POST tepat sasaran, penolakan konfigurasi/secret kosong tanpa request, dan penanganan kegagalan tanpa membocorkan respons. Total 29 test/221 pemeriksaan dan TypeScript berhasil. Tanggal kompatibilitas Worker memakai 12 Oktober 2026 karena Cloudflare masih pada tanggal UTC tersebut saat deployment, bukan tanggal lokal 13 Oktober.

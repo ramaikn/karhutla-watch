@@ -1,44 +1,48 @@
-# Penjadwalan melalui cron-job.org
+# Cloudflare Cron → GitHub Actions
 
-cron-job.org mengirim permintaan ke GitHub untuk menjalankan collector. Kode tetap dieksekusi GitHub Actions, bukan server cron-job.org. Respons HTTP 204 berarti pemicu diterima, bukan berarti collector sudah selesai. Antrean dan batas Actions tetap berlaku.
+Worker `karhutla-watch-scheduler` memanggil API GitHub `workflow_dispatch`. Collector tetap berjalan pada GitHub Actions; antrean dan batas Actions tetap berlaku. Respons 204 berarti pemicu diterima, bukan collector sudah selesai.
 
-## Token GitHub khusus
+Worker penjadwal terpisah dari situs. Tidak ada custom domain, workers.dev, preview URL, atau endpoint publik untuk memicu pembaruan. Workflow GitHub hanya memakai `workflow_dispatch`, tanpa `schedule`. Jangan mengaktifkan cron-job.org bersamaan.
 
-Buat **fine-grained personal access token** pada GitHub Settings → Developer settings → Personal access tokens. Pilih resource owner `ramaikn`, akses hanya repositori `karhutla-watch`, serta repository permission **Actions: Read and write**. Tetapkan masa berlaku yang terbatas dan catat jadwal penggantiannya.
+## Token khusus
 
-Token ini hanya untuk pemicu workflow. `FIRMS_MAP_KEY` tetap opsional pada repository Actions secrets. Jangan menaruh token GitHub dalam `.env.example`, URL job, kode frontend, issue, atau screenshot.
+Buat **fine-grained personal access token** di GitHub Settings → Developer settings → Personal access tokens:
 
-## Pengaturan job
+- Resource owner: `ramaikn`.
+- Repository access: hanya `karhutla-watch`.
+- Repository permissions: **Actions: Read and write**.
+- Masa berlaku terbatas; ganti secret sebelum token kedaluwarsa.
 
-Pada akun [cron-job.org](https://cron-job.org/), buat job:
+Jangan memakai token GitHub CLI yang lebih luas sebagai secret penjadwal. Jangan mengirim token lewat chat, menyimpannya di kode, atau memasukkannya sebagai variabel publik `VITE_*`.
 
-| Pengaturan | Nilai |
-| --- | --- |
-| Judul | Karhutla Watch: refresh data |
-| URL | `https://api.github.com/repos/ramaikn/karhutla-watch/actions/workflows/refresh-data.yml/dispatches` |
-| Jadwal khusus | `17,47 * * * *` |
-| Zona waktu | UTC |
-| Metode | POST |
-| Body | `{"ref":"main"}` |
+## Pasang secret
 
-Di pengaturan lanjutan, tambahkan header:
+Worker dapat disiapkan tanpa jadwal:
 
-```text
-Accept: application/vnd.github+json
-Authorization: Bearer TOKEN_KHUSUS_CRON
-Content-Type: application/json
-X-GitHub-Api-Version: 2022-11-28
-User-Agent: KarhutlaWatchScheduler
+```sh
+bun run deploy:scheduler
+bunx --bun wrangler secret put GITHUB_ACTIONS_TOKEN --config scheduler/wrangler.jsonc
 ```
 
-Ganti `TOKEN_KHUSUS_CRON` **hanya pada pengaturan privat cron-job.org**. Menyimpan token di sana memberikan layanan tersebut kemampuan memicu Actions pada repositori yang dipilih; gunakan token khusus dengan cakupan minimum.
+Perintah kedua meminta nilai token secara interaktif di terminal lokal. Alternatif: Cloudflare Dashboard → Workers & Pages → `karhutla-watch-scheduler` → Settings → Variables and Secrets → Add → tipe **Secret**, nama `GITHUB_ACTIONS_TOKEN`. Nilai hanya dimasukkan pada Cloudflare, bukan ke repositori.
 
-Jalankan tes satu kali dari cron-job.org. Periksa respons 204, lalu buka [Actions](https://github.com/ramaikn/karhutla-watch/actions/workflows/refresh-data.yml) untuk melihat hasil collector dan commit snapshot. Aktifkan pemberitahuan kegagalan job. Respons 401/403 biasanya terkait token, masa berlaku, izin repositori, atau kebijakan akun. Respons 404 dapat berarti workflow belum dipush atau tidak dapat diakses token.
+## Aktifkan jadwal
 
-## Hindari pemicu ganda
+Setelah secret tersedia, ubah `triggers.crons` dalam `scheduler/wrangler.jsonc`:
 
-Workflow hanya memiliki `workflow_dispatch`, tanpa `schedule` GitHub. Job cron-job.org belum aktif hanya karena dokumentasi ini ada; pemilik harus membuat dan mengaktifkannya pada akun layanan. Workflow masih bisa dijalankan manual melalui **Run workflow** di GitHub.
+```json
+{ "crons": ["17,47 * * * *"] }
+```
 
-Pembaruan menggunakan concurrency group agar collector tidak berjalan bersamaan. Jangan menjadwalkan terlalu sering: sumber berita memiliki cache/cooldown, API memiliki batas permintaan, dan snapshot menambah histori Git. Jika satu eksekusi masih berjalan, pemicu berikutnya dapat menunggu.
+Lalu jalankan `bun run deploy:scheduler`. Jadwal pada menit 17 dan 47 setiap jam **UTC**. Konfigurasi awal memakai array kosong agar tidak mengirim pemicu tanpa secret. Perubahan cron dapat membutuhkan hingga 15 menit untuk menyebar. Kelola cron melalui Wrangler, bukan konfigurasi dashboard terpisah yang dapat ditimpa deployment berikutnya.
 
-Pembaruan snapshot tidak otomatis menyebarkan situs. Ikuti [DEPLOY.md](DEPLOY.md) untuk hosting dan pengiriman data.
+## Periksa hasil
+
+- Cloudflare Dashboard → Worker penjadwal → Cron Events/Logs untuk hasil pemicu. Log tidak mencetak token atau isi respons GitHub.
+- [GitHub Actions](https://github.com/ramaikn/karhutla-watch/actions/workflows/refresh-data.yml) untuk hasil collector.
+- Pastikan waktu dan commit snapshot berubah setelah workflow selesai.
+- HTTP 401/403 biasanya terkait token, izin, atau masa berlaku. HTTP 404 dapat berarti repositori/workflow tidak tersedia untuk token.
+
+Worker melakukan satu permintaan tanpa percobaan ulang otomatis agar tidak menggandakan job ketika respons tidak pasti. Concurrency workflow mencegah collector berjalan bersama. Pemicu gagal tidak mengubah snapshot sebelumnya.
+
+Untuk mematikan jadwal, kembalikan `crons` menjadi `[]`, lalu deploy. Untuk fork, ganti account ID, nama Worker, repositori, dan token. Lihat [DEPLOY.md](DEPLOY.md) untuk hosting situs serta URL snapshot publik.

@@ -2,6 +2,8 @@
 
 Peta interaktif titik panas Indonesia, peringkat provinsi, kualitas udara, berita karhutla, dan prakiraan cuaca dalam satu tampilan.
 
+[Buka Karhutla Watch](https://karhutla.my.id)
+
 [![Pemeriksaan kode](https://github.com/ramaikn/karhutla-watch/actions/workflows/ci.yml/badge.svg)](https://github.com/ramaikn/karhutla-watch/actions/workflows/ci.yml)
 [![Lisensi Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 
@@ -74,7 +76,7 @@ Proyek ini bukan layanan tanggap darurat. Untuk informasi resmi, gunakan [BMKG](
 
 ## Deployment
 
-Build menghasilkan folder `dist` yang dapat dihosting statis. cron-job.org dapat memicu workflow GitHub dua kali per jam; antrean Actions tetap berlaku. Tidak ada jadwal bawaan GitHub agar pemicu tidak ganda. Kunci opsional disimpan sebagai Actions secret, bukan file publik. Lihat [panduan deployment](docs/DEPLOY.md) dan [pengaturan cron-job.org](docs/CRON.md).
+Build menghasilkan folder `dist` yang dihosting dengan Cloudflare Workers Static Assets. Worker Cloudflare penjadwal terpisah dapat memicu GitHub Actions dua kali per jam; antrean Actions tetap berlaku. Tidak ada jadwal bawaan GitHub agar pemicu tidak ganda. Jadwal dinonaktifkan sampai token khusus tersedia sebagai Cloudflare Secret. Kunci NASA opsional disimpan sebagai Actions secret, bukan file publik. Lihat [panduan deployment](docs/DEPLOY.md) dan [pengaturan Cloudflare Cron](docs/CRON.md).
 
 API gratis Open-Meteo ditujukan untuk penggunaan nonkomersial. Penggunaan komersial perlu memeriksa paket dan ketentuan sumber walaupun kode aplikasi berlisensi Apache-2.0.
 

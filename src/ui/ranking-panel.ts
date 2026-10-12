@@ -30,7 +30,7 @@ export class RankingPanel {
       const base = `${import.meta.env.BASE_URL}data/`;
       const [provinces, air] = await Promise.allSettled([
         this.provinces ? Promise.resolve(this.provinces) : fetch(`${base}provinces.json`, { signal: AbortSignal.timeout(20_000) }).then((r) => { if (!r.ok) throw new Error("Batas belum tersedia"); return r.json(); }),
-        fetch(`${base}air-quality.json`, { cache: "no-cache", signal: AbortSignal.timeout(20_000) }).then((r) => { if (!r.ok) throw new Error("Udara belum tersedia"); return r.json(); }),
+        fetch(import.meta.env.VITE_AIR_DATA_URL || `${base}air-quality.json`, { cache: "no-cache", signal: AbortSignal.timeout(20_000) }).then((r) => { if (!r.ok) throw new Error("Udara belum tersedia"); return r.json(); }),
       ]);
       if (provinces.status === "fulfilled") { validateProvinces(provinces.value); this.provinces = provinces.value; }
       else this.fireNode.replaceChildren(element("p", "empty-state", "Data peringkat belum tersedia."));
