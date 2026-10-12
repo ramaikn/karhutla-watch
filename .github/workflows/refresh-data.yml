@@ -1,0 +1,49 @@
+name: Perbarui data Karhutla Watch
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17,47 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: karhutla-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+      - run: bun install --frozen-lockfile --backend hardlink
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .runtime/indonesia.geojson
+            .runtime/boundary.json
+          key: indonesia-boundary-v1
+      - run: bun test
+      - run: bun run collect
+        env:
+          FIRMS_MAP_KEY: ${{ secrets.FIRMS_MAP_KEY }}
+      - run: bun run build
+      - name: Simpan snapshot untuk hosting statis
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/latest.json public/data/air-quality.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "chore(data): refresh monitoring snapshot"
+          git push origin HEAD:${{ github.event.repository.default_branch }}

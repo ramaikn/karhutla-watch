@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.runtime/
+.env*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+.openchamber/
+*.tsbuildinfo
+*.next

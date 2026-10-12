@@ -1,0 +1,24 @@
+Karhutla Watch
+Copyright 2026 AM Fathur Ramadhan
+https://github.com/ramaikn/karhutla-watch
+
+Kode asli proyek ini dilisensikan di bawah Apache License, Version 2.0.
+Distribusi kode atau karya turunan harus mempertahankan pemberitahuan hak
+cipta dan atribusi yang relevan sesuai bagian 4 LICENSE. Perubahan pada file
+harus diberi pemberitahuan yang jelas. Kredit di antarmuka tidak diwajibkan.
+
+Data dan dependensi pihak ketiga memiliki ketentuan tersendiri:
+- NASA FIRMS: https://www.earthdata.nasa.gov/data/tools/firms
+- BMKG: https://data.bmkg.go.id/prakiraan-cuaca/ (atribusi BMKG wajib)
+- OpenStreetMap: https://www.openstreetmap.org/copyright (ODbL)
+- geoBoundaries: https://www.geoboundaries.org/; batas nasional memakai OSM,
+  Open Data Commons Open Database License 1.0, sebagaimana metadata snapshot.
+- cahyadsn/wilayah dan cahyadsn/wilayah_boundaries: MIT, lihat lisensi data
+  pada public/data/locations-LICENSE.txt dan public/data/provinces-LICENSE.txt.
+- CAMS melalui Open-Meteo: data CC BY 4.0, atribusi CAMS ENSEMBLE dan
+  Open-Meteo; ketentuan API gratis membatasi penggunaan nonkomersial.
+  https://open-meteo.com/en/docs/air-quality-api
+  https://open-meteo.com/en/terms
+- Metadata berita dan artikel tetap tunduk pada hak serta ketentuan penerbit.
+
+Apache-2.0 tidak mengubah lisensi data, artikel, atau dependensi di atas.

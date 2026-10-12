@@ -1,0 +1,32 @@
+{
+  "name": "karhutla-watch",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "author": "AM Fathur Ramadhan",
+  "repository": { "type": "git", "url": "https://github.com/ramaikn/karhutla-watch.git" },
+  "type": "module",
+  "scripts": {
+    "dev": "bun scripts/dev.ts",
+    "dev:web": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "collect": "bun scripts/collect.ts",
+    "collect:news": "bun scripts/collect.ts --news-only",
+    "prepare:locations": "bun scripts/locations.ts",
+    "prepare:provinces": "bun scripts/provinces.ts",
+    "collect:air": "bun scripts/air-quality.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@turf/boolean-point-in-polygon": "^7.3.0",
+    "fast-xml-parser": "^5.3.0",
+    "maplibre-gl": "^5.20.0"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.0",
+    "@types/geojson": "^7946.0.16",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.0"
+  }
+}
