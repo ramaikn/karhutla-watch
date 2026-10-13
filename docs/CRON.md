@@ -24,7 +24,7 @@ bunx --bun wrangler secret put GITHUB_ACTIONS_TOKEN --config scheduler/wrangler.
 bun run deploy:scheduler
 ```
 
-Perintah kedua meminta nilai token secara interaktif di terminal lokal. Alternatif: Cloudflare Dashboard → Workers & Pages → `karhutla-watch-scheduler` → Settings → Variables and Secrets → Add → tipe **Secret**, nama `GITHUB_ACTIONS_TOKEN`. Nilai hanya dimasukkan pada Cloudflare, bukan ke repositori.
+Perintah pertama meminta nilai token secara interaktif di terminal lokal. Alternatif: Cloudflare Dashboard → Workers & Pages → `karhutla-watch-scheduler` → Settings → Variables and Secrets → Add → tipe **Secret**, nama `GITHUB_ACTIONS_TOKEN`. Nilai hanya dimasukkan pada Cloudflare, bukan ke repositori.
 
 ## Aktifkan jadwal
 
@@ -42,6 +42,12 @@ Jadwal berjalan pada menit 17 dan 47 setiap jam **UTC**, setelah Worker dideploy
 - [GitHub Actions](https://github.com/ramaikn/karhutla-watch/actions/workflows/refresh-data.yml) untuk hasil collector.
 - Pastikan waktu dan commit snapshot berubah setelah workflow selesai.
 - HTTP 401/403 biasanya terkait token, izin, atau masa berlaku. HTTP 404 dapat berarti repositori/workflow tidak tersedia untuk token.
+
+Handler mencatat status HTTP penolakan GitHub, bukan isi respons atau token. Error jaringan memakai pesan tetap agar rahasia tidak masuk log. Secret terpasang dan deployment sukses belum membuktikan dispatch berhasil; verifikasi Cron Event dan run GitHub yang cocok. Pada 13 Oktober 2026, `CLOUDFLARE_CRON_ENABLED=true` dipulihkan sesuai keputusan pemilik: Cloudflare tetap menjadi pemicu utama.
+
+Runtime Cloudflare hanya menerima `redirect: "follow"` atau `"manual"`, bukan `"error"`. Dispatcher memakai `manual` dan hanya menerima HTTP 204, sehingga redirect ditolak tanpa meneruskan Authorization ke tujuan lain. Bug `redirect: "error"` sebelumnya menghentikan cron sebelum permintaan dikirim, walaupun pengujian Bun lolos.
+
+Verifikasi live 13 Oktober 2026: cron 18:17 WITA pada versi `d33821f7-d25b-4294-9273-ab7b90bcabe9` berstatus `ok`, tanpa exception. GitHub run `38382347904` (`workflow_dispatch`) selesai sukses 18:18:36 WITA, menerbitkan commit data `8b6b9b0ff8b9fcaf2d5ce51d8c8053f9c726e8e2`. Snapshot utama, ranking, dan berita bertanggal 18:17:47 WITA; udara 18:17:48 WITA. Semua tiga sensor NASA, 25 sumber berita, empat lokasi BMKG, dan 38 lokasi udara berhasil. URL raw berbasis commit sudah berisi data baru; URL raw `main` sempat masih berisi cache lama (`max-age=300`), jadi publikasi commit dan pembaruan cache perlu dibedakan.
 
 Worker melakukan satu permintaan tanpa percobaan ulang otomatis agar tidak menggandakan job ketika respons tidak pasti. Concurrency workflow mencegah collector berjalan bersama. Pemicu gagal tidak mengubah snapshot sebelumnya.
 

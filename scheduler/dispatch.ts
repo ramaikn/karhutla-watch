@@ -1,9 +1,11 @@
 export interface SchedulerEnv { GITHUB_ACTIONS_TOKEN: string; GITHUB_REPOSITORY: string; GITHUB_WORKFLOW: string; GITHUB_REF: string }
 type Requester = (url: string, options: RequestInit) => Promise<Response>;
 
+export class SchedulerDispatchError extends Error {}
+
 export async function dispatchRefresh(env: SchedulerEnv, requester: Requester = fetch): Promise<void> {
-  if (!env.GITHUB_ACTIONS_TOKEN?.trim()) throw new Error("Secret penjadwal belum tersedia.");
-  if (!/^[\w.-]+\/[\w.-]+$/.test(env.GITHUB_REPOSITORY) || !/^[\w.-]+\.yml$/.test(env.GITHUB_WORKFLOW) || !env.GITHUB_REF?.trim()) throw new Error("Konfigurasi penjadwal tidak valid.");
+  if (!env.GITHUB_ACTIONS_TOKEN?.trim()) throw new SchedulerDispatchError("Secret penjadwal belum tersedia.");
+  if (!/^[\w.-]+\/[\w.-]+$/.test(env.GITHUB_REPOSITORY) || !/^[\w.-]+\.yml$/.test(env.GITHUB_WORKFLOW) || !env.GITHUB_REF?.trim()) throw new SchedulerDispatchError("Konfigurasi penjadwal tidak valid.");
   const response = await requester(`https://api.github.com/repos/${env.GITHUB_REPOSITORY}/actions/workflows/${env.GITHUB_WORKFLOW}/dispatches`, {
     method: "POST",
     headers: {
@@ -15,8 +17,8 @@ export async function dispatchRefresh(env: SchedulerEnv, requester: Requester = 
     },
     body: JSON.stringify({ ref: env.GITHUB_REF }),
     signal: AbortSignal.timeout(15_000),
-    redirect: "error",
+    redirect: "manual",
   });
   // Jangan mencetak respons, header, atau token ke log.
-  if (response.status !== 204) throw new Error(`GitHub menolak pemicu: HTTP ${response.status}.`);
+  if (response.status !== 204) throw new SchedulerDispatchError(`GitHub menolak pemicu: HTTP ${response.status}.`);
 }
