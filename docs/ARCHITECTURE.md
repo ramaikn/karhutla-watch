@@ -33,7 +33,7 @@
 
 ## Keputusan penting
 
-- Header mobile maksimal 100 piksel dengan dua baris: logo, wilayah, waktu, ikon Filter/About pada baris pertama; lima tab pada baris kedua. Teks brand dan tombol lengkap tetap tampil di desktop. Ikon memiliki nama aksesibel dan kontrol tetap setinggi 40 piksel.
+- Header mobile maksimal 100 piksel dengan dua baris: logo dan teks Karhutla Watch, ikon Filter/About pada baris pertama; lima tab pada baris kedua. Wilayah, waktu, keyakinan, dan satelit berada di toggle Filter. Dialog About mencantumkan A.M. Fathur Ramadhan sebagai author dan tautan Let’s connect. Ikon memiliki nama aksesibel dan kontrol tetap setinggi 40 piksel.
 - Semua media menggunakan Google News RSS per penerbit; tidak ada jalur khusus ANTARA. Urutan tampilan murni waktu terbit, tanpa kuota penerbit.
 - Peringkat deteksi nasional mengikuti waktu/keyakinan/satelit, bukan kotak wilayah peta. Deteksi di luar poligon tidak ditebak sebagai provinsi terdekat.
 - Jendela waktu ranking berakhir pada waktu snapshot collector, bukan jam browser. Tanggal snapshot ditampilkan agar hasil yang statis tidak diklaim sebagai hitungan langsung. Filter peta tetap memakai waktu browser.

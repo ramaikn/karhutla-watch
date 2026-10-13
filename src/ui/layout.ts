@@ -8,9 +8,9 @@ export const layout = `
       <a class="brand" href="#peta" aria-label="Karhutla Watch, peta"><img src="./favicon.svg" alt="" width="24" height="24"><span>Karhutla <strong>Watch</strong></span></a>
       <button id="open-about" type="button" aria-label="Tentang Karhutla Watch" aria-haspopup="dialog" aria-controls="about-dialog"><span>About</span><svg class="toolbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7v1"/></svg></button>
       <form id="filters" class="filters">
-        <select id="region" aria-label="Wilayah peta"></select>
-        <select id="hours" aria-label="Rentang waktu"><option value="24">24 jam</option><option value="72">3 hari</option><option value="168">7 hari</option></select>
-        <details class="filter-options"><summary aria-label="Filter keyakinan dan satelit"><span>Filter</span><svg class="toolbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2" fill="var(--surface)"/><circle cx="15" cy="17" r="2" fill="var(--surface)"/></svg></summary><div class="filter-popover surface">
+        <details class="filter-options"><summary aria-label="Pengaturan filter peta"><span>Filter</span><svg class="toolbar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="2" fill="var(--surface)"/><circle cx="15" cy="17" r="2" fill="var(--surface)"/></svg></summary><div class="filter-popover surface">
+          <label>Wilayah<select id="region" aria-label="Wilayah peta"></select></label>
+          <label>Rentang waktu<select id="hours" aria-label="Rentang waktu"><option value="24">24 jam</option><option value="72">3 hari</option><option value="168">7 hari</option></select></label>
           <label>Keyakinan<select id="confidence"><option value="reliable">Nominal & tinggi</option><option value="all">Semua tingkat</option><option value="h">Tinggi saja</option></select></label>
           <label>Satelit<select id="sensor"><option value="all">Semua VIIRS</option><option value="VIIRS_NOAA20_NRT">NOAA-20</option><option value="VIIRS_NOAA21_NRT">NOAA-21</option><option value="VIIRS_SNPP_NRT">S-NPP</option></select></label>
         </div></details>
