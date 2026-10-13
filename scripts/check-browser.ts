@@ -51,6 +51,14 @@ try {
     const geometry = await evaluate(`(() => { const toolbar = document.querySelector('.map-toolbar').getBoundingClientRect(); const summary = document.querySelector('.map-summary').getBoundingClientRect(); return { width: innerWidth, documentWidth: document.documentElement.scrollWidth, toolbarBottom: toolbar.bottom, summaryTop: summary.top }; })()`);
     assert(geometry.documentWidth === width, `Overflow pada ${width}: ${JSON.stringify(geometry)}`);
     assert(geometry.summaryTop >= geometry.toolbarBottom, `Kartu deteksi menabrak header pada ${width}`);
+    if (mobile) {
+      const compact = await evaluate(`(() => { const bounds = document.querySelector('.map-toolbar').getBoundingClientRect(); const ids = ['region', 'hours', 'open-about']; const controls = ids.map(id => document.getElementById(id).getBoundingClientRect()); return { height: bounds.height, aligned: controls.every(box => Math.abs(box.top - controls[0].top) < 2), contained: controls.every(box => box.left >= bounds.left && box.right <= bounds.right), iconVisible: getComputedStyle(document.querySelector('#open-about .toolbar-icon')).display !== 'none' }; })()`);
+      assert(compact.height <= 100 && compact.aligned && compact.contained && compact.iconVisible, `Header mobile tidak ringkas pada ${width}: ${JSON.stringify(compact)}`);
+      await evaluate("document.querySelector('.filter-options > summary').click()");
+      const popover = await evaluate(`(() => { const box = document.querySelector('.filter-popover').getBoundingClientRect(); return { open: document.querySelector('.filter-options').open, visible: box.left >= 0 && box.right <= innerWidth }; })()`);
+      assert(popover.open && popover.visible, `Filter terpotong pada ${width}`);
+      await evaluate("document.querySelector('.filter-options > summary').click()");
+    }
     for (const panel of ["ranking", "detections", "weather", "sources"]) {
       await evaluate(`document.querySelector('[data-panel="${panel}"]').click()`);
       const state = await evaluate(`(() => { const drawer = document.getElementById('detail-panel'); return { detailVisible: !drawer.hidden, newsVisible: !document.getElementById('berita').hidden, belowMap: drawer.getBoundingClientRect().top >= document.getElementById('peta').getBoundingClientRect().bottom }; })()`);

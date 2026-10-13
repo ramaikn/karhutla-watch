@@ -33,6 +33,7 @@
 
 ## Keputusan penting
 
+- Header mobile maksimal 100 piksel dengan dua baris: logo, wilayah, waktu, ikon Filter/About pada baris pertama; lima tab pada baris kedua. Teks brand dan tombol lengkap tetap tampil di desktop. Ikon memiliki nama aksesibel dan kontrol tetap setinggi 40 piksel.
 - Semua media menggunakan Google News RSS per penerbit; tidak ada jalur khusus ANTARA. Urutan tampilan murni waktu terbit, tanpa kuota penerbit.
 - Peringkat deteksi nasional mengikuti waktu/keyakinan/satelit, bukan kotak wilayah peta. Deteksi di luar poligon tidak ditebak sebagai provinsi terdekat.
 - Jendela waktu ranking berakhir pada waktu snapshot collector, bukan jam browser. Tanggal snapshot ditampilkan agar hasil yang statis tidak diklaim sebagai hitungan langsung. Filter peta tetap memakai waktu browser.
@@ -45,6 +46,8 @@
 - Jangan menaruh rahasia pada `VITE_*`. `.runtime` dan `.env*` bukan berkas publik.
 
 ## Pemeriksaan terakhir
+
+13 Oktober 2026, header mobile dipadatkan menjadi sekitar 98 piksel. 38 test/259 pemeriksaan, TypeScript dan build berhasil. Chrome memeriksa 320, 390, 700, 768, 1024, dan 1440 piksel: tidak ada overflow, tab panel dan About tetap berfungsi. Cron Cloudflare 18:17 WITA berhasil sampai publikasi snapshot GitHub; detail ada di `CRON.md`.
 
 13 Oktober 2026, pembaruan mobile dan About: 36 test dengan 249 pemeriksaan, TypeScript dan build berhasil. Chrome headless memeriksa lebar 320, 390, 700, 768, 1024, dan 1440 piksel: tidak ada overflow horizontal, kartu deteksi di bawah header, satu panel mobile di bawah peta, serta dialog terpusat yang mengembalikan fokus saat ditutup. Screenshot berada di `.runtime/ui-check/`. Pemeriksaan otomatis memakai Chrome terpisah karena viewport panel browser aplikasi tidak selalu mengubah lebar halaman sebenarnya. Ini belum pengujian perangkat fisik pengguna.
 
