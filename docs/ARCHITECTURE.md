@@ -33,6 +33,7 @@
 
 ## Keputusan penting
 
+- Berita memakai pagination 20 artikel per halaman (`src/domain/news-page.ts`), pencarian mencakup seluruh snapshot. Pergantian halaman mengembalikan scroll ke awal berita; pembaruan otomatis mempertahankan halaman yang dipilih.
 - Header mobile maksimal 100 piksel dengan dua baris: logo dan teks Karhutla Watch, ikon Filter/About pada baris pertama; lima tab pada baris kedua. Wilayah, waktu, keyakinan, dan satelit berada di toggle Filter. Dialog About mencantumkan A.M. Fathur Ramadhan sebagai author dan tautan Let’s connect. Ikon memiliki nama aksesibel dan kontrol tetap setinggi 40 piksel.
 - Semua media menggunakan Google News RSS per penerbit; tidak ada jalur khusus ANTARA. Urutan tampilan murni waktu terbit, tanpa kuota penerbit.
 - Peringkat deteksi nasional mengikuti waktu/keyakinan/satelit, bukan kotak wilayah peta. Deteksi di luar poligon tidak ditebak sebagai provinsi terdekat.

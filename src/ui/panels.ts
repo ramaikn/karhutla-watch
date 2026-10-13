@@ -1,6 +1,7 @@
 import type { Article, Hotspot, WeatherLocation } from "../domain/types";
 import { dailyCounts, safeUrl } from "../domain/filters";
 import { element, externalLink, formatDate, numberFormat } from "./dom";
+import { newsPage } from "../domain/news-page";
 
 export function renderDetections(container: HTMLElement, points: Hotspot[], available: boolean, onSelect: (point: Hotspot) => void): void {
   container.replaceChildren();
@@ -36,14 +37,14 @@ export function renderTrend(container: HTMLElement, points: Hotspot[], available
   container.append(chart);
 }
 
-export function renderNews(container: HTMLElement, articles: Article[], search: string): void {
+export function renderNews(container: HTMLElement, articles: Article[], search: string, page = 1) {
   container.replaceChildren();
   const query = search.trim().toLocaleLowerCase("id");
-  const matches = articles.filter((article) => `${article.title} ${article.domain}`.toLocaleLowerCase("id").includes(query))
-    .sort((a, b) => Date.parse(b.publishedAt ?? b.indexedAt) - Date.parse(a.publishedAt ?? a.indexedAt));
+  const result = newsPage(articles, search, page);
+  const matches = result.articles;
   if (!matches.length) {
     container.append(element("p", "empty-state", query ? "Tidak ada berita yang cocok." : "Belum ada berita."));
-    return;
+    return result;
   }
   for (const article of matches) {
     const url = safeUrl(article.url);
@@ -52,6 +53,7 @@ export function renderNews(container: HTMLElement, articles: Article[], search: 
     card.append(element("p", "news-meta", `${article.domain} · ${formatDate(article.publishedAt ?? article.indexedAt)}`), externalLink(article.title, url, "news-title"));
     container.append(card);
   }
+  return result;
 }
 
 export function renderWeather(container: HTMLElement, location: WeatherLocation | undefined): void {
