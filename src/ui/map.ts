@@ -4,7 +4,7 @@ import type { Hotspot } from "../domain/types";
 import { REGIONS } from "../domain/filters";
 import { element, formatDate } from "./dom";
 import { heatmapGeojson } from "../domain/heatmap";
-import { basemapStyle } from "./basemap";
+import { basemapPaint, basemapStyle, satelliteSource, type MapAppearance } from "./basemap";
 
 maplibregl.setWorkerCount(2);
 
@@ -15,6 +15,7 @@ export class HotspotMap {
   private popup: maplibregl.Popup | null = null;
   private region = "all";
   private mode: "points" | "heatmap" = "points";
+  private appearance: MapAppearance = "dark";
   private newsVisible = true;
 
   constructor(container: HTMLElement, onError: (message: string) => void) {
@@ -26,7 +27,11 @@ export class HotspotMap {
     });
     this.map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
     this.map.on("resize", () => this.fit(this.region));
-    this.map.on("error", () => onError("Sebagian peta gagal dimuat. Daftar deteksi tetap dapat digunakan."));
+    this.map.on("error", (event) => {
+      if ("sourceId" in event && event.sourceId === "satellite") {
+        if (this.appearance === "clouds") onError("Citra awan satelit belum dapat dimuat. Peta dasar dan deteksi tetap tersedia.");
+      } else onError("Sebagian peta gagal dimuat. Daftar deteksi tetap dapat digunakan.");
+    });
     this.map.on("load", () => {
       this.ready = true;
       this.map.addSource("hotspots", { type: "geojson", data: this.geojson(), cluster: true, clusterRadius: 38, clusterMaxZoom: 8 });
@@ -63,6 +68,7 @@ export class HotspotMap {
       }
       this.fit(this.region);
       this.setMode(this.mode);
+      this.setAppearance(this.appearance);
     });
   }
 
@@ -85,6 +91,19 @@ export class HotspotMap {
     if (!this.ready) return;
     for (const id of ["clusters", "points"]) this.map.setLayoutProperty(id, "visibility", mode === "points" ? "visible" : "none");
     this.map.setLayoutProperty("heatmap", "visibility", mode === "heatmap" ? "visible" : "none");
+  }
+
+  setAppearance(appearance: MapAppearance): void {
+    this.appearance = appearance;
+    if (!this.ready) return;
+    for (const [property, value] of Object.entries(basemapPaint(appearance)!)) this.map.setPaintProperty("base", property, value);
+    this.map.setPaintProperty("background", "background-color", appearance === "dark" ? "#101317" : "#aad3df");
+    if (appearance === "clouds" && !this.map.getSource("satellite")) {
+      this.map.addSource("satellite", satelliteSource());
+      // Citra di atas peta dasar; deteksi tetap di atas awan dan dapat diklik.
+      this.map.addLayer({ id: "satellite", type: "raster", source: "satellite", paint: { "raster-opacity": 0.9, "raster-fade-duration": 0 } }, "heatmap");
+    }
+    if (this.map.getLayer("satellite")) this.map.setLayoutProperty("satellite", "visibility", appearance === "clouds" ? "visible" : "none");
   }
 
   fit(region: string): void {

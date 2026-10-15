@@ -28,6 +28,11 @@ export const layout = `
       <strong id="count">…</strong><span>deteksi</span>
       <div class="view-toggle" role="group" aria-label="Tampilan peta"><button id="view-points" type="button" aria-pressed="true">Titik</button><button id="view-heatmap" type="button" aria-pressed="false">Heatmap</button></div>
     </div>
+    <div class="map-appearance surface" role="group" aria-label="Mode peta dasar">
+      <button id="map-dark" type="button" aria-label="Peta gelap" title="Peta gelap" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 13.4A9 9 0 0 1 10.6 3.2a9 9 0 1 0 10.2 10.2Z"/></svg></button>
+      <button id="map-natural" type="button" aria-label="Peta berwarna" title="Peta berwarna" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2Z M9 3v16M15 5v16"/></svg></button>
+      <button id="map-clouds" type="button" aria-label="Citra satelit dan awan, komposit harian kemarin UTC, bukan peta asap" title="Citra satelit & awan · kemarin UTC" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4 4 0 1 1 .5-8A6 6 0 0 1 19 12a3 3 0 0 1-1 6Z"/></svg></button>
+    </div>
     <p id="load-error" class="error-message surface" role="alert" hidden></p>
     <div id="map-empty" class="map-message surface" role="status" hidden></div>
     <p id="map-error" class="map-error surface" role="status" hidden></p>

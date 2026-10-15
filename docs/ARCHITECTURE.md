@@ -14,7 +14,7 @@
 | --- | --- |
 | `src/ui/layout.ts`, `src/style.css`, `src/ui/workspace.ts`, `workspace-state.ts` | Desktop: panel terpisah. Mobile: satu panel di bawah peta, tab dan navigasi keyboard. Tinggi header diukur dengan ResizeObserver |
 | `src/ui/about.ts` | Dialog About native, tautan proyek/profil, penutupan dan pemulihan fokus |
-| `src/ui/map.ts`, `src/ui/basemap.ts` | MapLibre, OSM tanpa kunci, titik/heatmap/popup |
+| `src/ui/map.ts`, `src/ui/basemap.ts`, `src/ui/map-appearance.ts` | MapLibre, OSM gelap/berwarna, citra satelit awan NASA GIBS, kontrol ikon, titik/heatmap/popup |
 | `src/domain/filters.ts`, `normalize.ts`, `snapshot.ts`, `heatmap.ts` | Validasi dan pengolahan data |
 | `src/domain/rankings.ts`, `ranking-snapshot.ts`, `scripts/prepare-data.ts` | Point-in-polygon pada collector, 36 tabel siap tampil, validasi hasil |
 | `src/ui/ranking-panel.ts`, `news-panel.ts`, `src/domain/data-url.ts` | Panel ringan paralel, pembaruan tanpa mengosongkan data lama, URL mengikuti sumber snapshot |
@@ -33,6 +33,8 @@
 
 ## Keputusan penting
 
+- Tiga mode dasar memakai ikon vertikal di bawah header dan kontrol zoom. Default tetap gelap. Pergantian hanya mengubah warna raster dan visibilitas citra, tanpa `setStyle`, sehingga posisi, popup, filter, sumber deteksi, dan heatmap tidak direset. Sumber NASA GIBS baru ditambahkan saat mode awan dipilih; raster berada di bawah deteksi. Citra VIIRS NOAA-20 True Color memakai kemarin UTC, batas zoom sumber 9, dan tanggal pada atribusi. Ini komposit harian dengan kemungkinan celah/jeda sumber, bukan awan langsung atau sebaran asap. Kegagalan citra mempertahankan OSM serta deteksi dan menampilkan pesan singkat.
+
 - Berita memakai pagination 20 artikel per halaman (`src/domain/news-page.ts`), pencarian mencakup seluruh snapshot. Pergantian halaman mengembalikan scroll ke awal berita; pembaruan otomatis mempertahankan halaman yang dipilih.
 - Header mobile maksimal 100 piksel dengan dua baris: logo dan teks Karhutla Watch, ikon Filter/About pada baris pertama; lima tab pada baris kedua. Wilayah, waktu, keyakinan, dan satelit berada di toggle Filter. Dialog About mencantumkan A.M. Fathur Ramadhan sebagai author dan tautan Let’s connect. Ikon memiliki nama aksesibel dan kontrol tetap setinggi 40 piksel.
 - Semua media menggunakan Google News RSS per penerbit; tidak ada jalur khusus ANTARA. Urutan tampilan murni waktu terbit, tanpa kuota penerbit.
@@ -47,6 +49,8 @@
 - Jangan menaruh rahasia pada `VITE_*`. `.runtime` dan `.env*` bukan berkas publik.
 
 ## Pemeriksaan terakhir
+
+15 Oktober 2026, tiga mode peta: 43 test/281 pemeriksaan, TypeScript, build produksi, dan `git diff --check` berhasil. Chrome memeriksa 320, 390, 700, 768, 1024, dan 1440 piksel: ikon tidak bertabrakan, default gelap, pergantian mode dan heatmap tidak mengubah hitungan, serta panel, filter, About, dan fokus tetap berfungsi tanpa kesalahan browser. Citra NASA GIBS kemarin UTC berhasil dirender dan diperiksa secara visual. Dependensi tidak ditambah; peringatan ukuran bundle MapLibre yang sudah ada tetap muncul.
 
 13 Oktober 2026, header mobile dipadatkan menjadi sekitar 98 piksel. 38 test/259 pemeriksaan, TypeScript dan build berhasil. Chrome memeriksa 320, 390, 700, 768, 1024, dan 1440 piksel: tidak ada overflow, tab panel dan About tetap berfungsi. Cron Cloudflare 18:17 WITA berhasil sampai publikasi snapshot GitHub; detail ada di `CRON.md`.
 

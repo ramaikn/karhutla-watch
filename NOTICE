@@ -8,6 +8,9 @@ harus diberi pemberitahuan yang jelas. Kredit di antarmuka tidak diwajibkan.
 
 Data dan dependensi pihak ketiga memiliki ketentuan tersendiri:
 - NASA FIRMS: https://www.earthdata.nasa.gov/data/tools/firms
+- NASA GIBS / VIIRS NOAA-20 Corrected Reflectance True Color:
+  https://www.earthdata.nasa.gov/engage/open-data-services-software/global-imagery-browse-services-gibs
+  Komposit harian, bukan data awan langsung atau peta sebaran asap.
 - BMKG: https://data.bmkg.go.id/prakiraan-cuaca/ (atribusi BMKG wajib)
 - OpenStreetMap: https://www.openstreetmap.org/copyright (ODbL)
 - geoBoundaries: https://www.geoboundaries.org/; batas nasional memakai OSM,

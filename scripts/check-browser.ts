@@ -47,10 +47,21 @@ try {
     const mobile = width <= 700;
     await send("Emulation.setDeviceMetricsOverride", { width, height: 844, deviceScaleFactor: 1, mobile });
     await send("Page.navigate", { url });
-    await evaluate(`new Promise(resolve => { const timer = setInterval(() => { if (document.getElementById('count')?.textContent !== '…' && document.querySelector('.maplibregl-canvas')) { clearInterval(timer); resolve(true); } }, 100); setTimeout(() => { clearInterval(timer); resolve(false); }, 30000); })`);
+    assert(await evaluate(`new Promise(resolve => { const timer = setInterval(() => { const count = document.getElementById('count')?.textContent; if (count && count !== '…' && document.querySelector('.maplibregl-canvas')) { clearInterval(timer); clearTimeout(deadline); resolve(true); } }, 100); const deadline = setTimeout(() => { clearInterval(timer); resolve(false); }, 30000); })`), `Peta atau snapshot tidak siap pada ${width}`);
     const geometry = await evaluate(`(() => { const toolbar = document.querySelector('.map-toolbar').getBoundingClientRect(); const summary = document.querySelector('.map-summary').getBoundingClientRect(); return { width: innerWidth, documentWidth: document.documentElement.scrollWidth, toolbarBottom: toolbar.bottom, summaryTop: summary.top }; })()`);
     assert(geometry.documentWidth === width, `Overflow pada ${width}: ${JSON.stringify(geometry)}`);
     assert(geometry.summaryTop >= geometry.toolbarBottom, `Kartu deteksi menabrak header pada ${width}`);
+    const appearanceControls = await evaluate(`(() => { const box = document.querySelector('.map-appearance').getBoundingClientRect(); const zoom = document.querySelector('.maplibregl-ctrl-group').getBoundingClientRect(); const stage = document.getElementById('peta').getBoundingClientRect(); const summary = document.querySelector('.map-summary').getBoundingClientRect(); return { visible: box.top >= zoom.bottom && box.bottom < stage.bottom && box.left >= 0 && box.right <= innerWidth, avoidsSummary: box.left >= summary.right || box.top >= summary.bottom, active: document.querySelector('.map-appearance [aria-pressed="true"]').id }; })()`);
+    assert(appearanceControls.visible && appearanceControls.avoidsSummary && appearanceControls.active === "map-dark", `Ikon mode bertabrakan atau default berubah pada ${width}: ${JSON.stringify(appearanceControls)}`);
+    const countBeforeMode = await evaluate("document.getElementById('count').textContent");
+    for (const appearance of ["natural", "clouds", "dark"]) {
+      await evaluate(`document.getElementById('map-${appearance}').click()`);
+      assert(await evaluate(`document.querySelectorAll('.map-appearance [aria-pressed="true"]').length === 1 && document.getElementById('map-${appearance}').getAttribute('aria-pressed') === 'true'`), `Ikon ${appearance} tidak aktif pada ${width}`);
+      assert(await evaluate("document.getElementById('count').textContent") === countBeforeMode, `Mode mengubah hitungan deteksi pada ${width}`);
+      await evaluate("document.getElementById('view-heatmap').click()");
+      assert(await evaluate("document.getElementById('view-heatmap').getAttribute('aria-pressed') === 'true' && !document.getElementById('heatmap-legend').hidden"), `Heatmap gagal setelah mode ${appearance} pada ${width}`);
+      await evaluate("document.getElementById('view-points').click()");
+    }
     if (mobile) {
       const compact = await evaluate(`(() => { const bounds = document.querySelector('.map-toolbar').getBoundingClientRect(); const controls = ['.brand', '.filter-options > summary', '#open-about'].map(selector => document.querySelector(selector).getBoundingClientRect()); return { height: bounds.height, aligned: controls.every(box => Math.abs(box.top - controls[0].top) < 2), contained: controls.every(box => box.left >= bounds.left && box.right <= bounds.right), iconVisible: getComputedStyle(document.querySelector('#open-about .toolbar-icon')).display !== 'none' }; })()`);
       assert(compact.height <= 100 && compact.aligned && compact.contained && compact.iconVisible, `Header mobile tidak ringkas pada ${width}: ${JSON.stringify(compact)}`);
@@ -77,7 +88,7 @@ try {
     await evaluate("document.getElementById('close-about').click()");
     await evaluate("new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))");
     assert(await evaluate("!document.getElementById('about-dialog').open && document.activeElement.id === 'open-about'"), `Penutupan About gagal pada ${width}`);
-    console.log(`OK ${width}px: header, panel, About, dan fokus.`);
+    console.log(`OK ${width}px: tiga mode peta, heatmap, header, panel, About, dan fokus.`);
   }
   assert(errors.length === 0, `Kesalahan browser: ${errors.join("; ")}`);
 } finally {

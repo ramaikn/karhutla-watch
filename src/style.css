@@ -44,6 +44,13 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: #30363
 .view-toggle { display: flex; gap: 1px; border-left: 1px solid var(--line); padding-left: 8px; margin-left: 4px; }
 .view-toggle button { border-color: transparent; background: transparent; padding: 5px 8px; }
 .view-toggle button[aria-pressed="true"] { background: #3a424c; }
+.map-appearance { position: absolute; top: calc(var(--toolbar-bottom) + 88px); right: 366px; z-index: 2; display: flex; flex-direction: column; padding: 2px; gap: 2px; }
+.map-appearance button { display: grid; place-items: center; width: 36px; height: 40px; padding: 8px; background: transparent; border-color: transparent; }
+.map-appearance button:hover { background: #30363e; }
+.map-appearance button[aria-pressed="true"] { background: #3a424c; border-color: #737e8c; }
+.map-appearance svg { width: 20px; height: 20px; }
+.news-hidden .map-appearance { right: 16px; }
+@media (min-width: 701px) and (max-width: 1000px) { .map-appearance { right: 336px; } }
 .news-panel { position: absolute; top: calc(var(--toolbar-bottom) + 12px); right: 12px; bottom: 40px; width: 340px; z-index: 3; display: flex; flex-direction: column; overflow: hidden; }
 .section-heading, .drawer-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .section-heading > span { color: var(--muted); font-size: 11px; }
@@ -130,5 +137,6 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: #30363
   .drawer-heading { position: static; }
   .map-legend { bottom: 38px; left: 8px; gap: 7px; font-size: 9px; max-width: calc(100% - 16px); }.map-caution { flex-basis: 100%; }
   .maplibregl-ctrl-top-right, .news-hidden .maplibregl-ctrl-top-right { top: calc(var(--toolbar-bottom) + 8px); right: 0; }
+  .map-appearance, .news-hidden .map-appearance { right: 8px; }
   .map-message { top: calc(var(--toolbar-bottom) + 64px); left: 8px; }.error-message { top: calc(var(--toolbar-bottom) + 112px); left: 8px; }
 }

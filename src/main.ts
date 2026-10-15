@@ -12,12 +12,15 @@ import { WeatherSearch } from "./ui/weather-search";
 import { RankingPanel } from "./ui/ranking-panel";
 import { NewsPanel } from "./ui/news-panel";
 import { dataUrl } from "./domain/data-url";
+import type { MapAppearance } from "./ui/basemap";
+import { initializeMapAppearance } from "./ui/map-appearance";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = layout;
 function node<T extends HTMLElement = HTMLElement>(id: string): T { return document.getElementById(id) as T; }
 let snapshot: Snapshot | null = null;
 let map: HotspotMap | null = null;
 let mode: "points" | "heatmap" = "points";
+let appearance: MapAppearance = "dark";
 let loading = false;
 let mapFingerprint = "";
 const snapshotUrl = dataUrl("latest.json");
@@ -32,6 +35,7 @@ async function initializeMap(): Promise<void> {
     map = new HotspotMap(node("map"), (message) => { node("map-error").textContent = message; node("map-error").hidden = false; });
     map.setNewsVisible(!node("berita").hidden);
     map.setMode(mode);
+    map.setAppearance(appearance);
     mapFingerprint = "";
     render();
   } catch {
@@ -108,6 +112,12 @@ for (const selected of ["points", "heatmap"] as const) {
     node("heatmap-legend").hidden = mode !== "heatmap";
   });
 }
+
+initializeMapAppearance((selected) => {
+  appearance = selected;
+  node("map-error").hidden = true;
+  map?.setAppearance(appearance);
+});
 
 node("filters").addEventListener("submit", (event) => event.preventDefault());
 node("filters").addEventListener("change", () => {

@@ -11,7 +11,7 @@ Peta interaktif titik panas Indonesia, peringkat provinsi, kualitas udara, berit
 
 ## Fitur
 
-- **Peta penuh, dark mode.** Deteksi satelit NASA FIRMS VIIRS dengan tampilan titik, kelompok, atau heatmap kepadatan.
+- **Tiga mode peta.** Gelap sebagai default, peta berwarna hijau-biru, atau citra satelit dengan awan. Tiga ikon di bawah header mengganti peta tanpa mengubah filter, posisi, dan tampilan titik/heatmap. Citra NASA VIIRS adalah komposit harian kemarin UTC, bukan data awan langsung atau peta sebaran asap.
 - **Peringkat wilayah.** 38 provinsi diurutkan berdasarkan jumlah deteksi. Kolom tambahan menunjukkan keyakinan tinggi dan daya radiasi api maksimum (FRP, MW). Klik provinsi untuk memusatkan peta.
 - **Kualitas udara.** Tabel PM2.5 dan PM10 dari model CAMS Global melalui Open-Meteo pada satu lokasi acuan per provinsi, diurutkan berdasarkan PM2.5 tertinggi.
 - **Berita dari 25 media.** Setiap media memakai pencarian, rentang waktu, dan batas hasil yang sama. Artikel terbaru tampil paling atas, dengan pencarian judul atau penerbit.
@@ -68,6 +68,7 @@ Indeks wilayah dan geometri provinsi sudah disertakan. `bun run prepare:location
 | Nama wilayah | [cahyadsn/wilayah](https://github.com/cahyadsn/wilayah) | Kode Kemendagri, bukan kode BPS |
 | Berita | Google News RSS per penerbit | Judul, penerbit, waktu terbit dari RSS, dan tautan |
 | Peta dasar | [OpenStreetMap](https://www.openstreetmap.org/copyright) | Tile raster dengan penyesuaian gelap |
+| Citra satelit dan awan | [NASA GIBS](https://www.earthdata.nasa.gov/engage/open-data-services-software/global-imagery-browse-services-gibs) | VIIRS NOAA-20 Corrected Reflectance True Color, komposit harian kemarin UTC; tanggal tercantum pada atribusi |
 
 **Peringkat bukan skor bahaya.** Deteksi berulang dari lintasan/satelit berbeda tetap dihitung sebagai deteksi, bukan kebakaran berbeda. FRP adalah daya radiasi, bukan suhu. Heatmap menunjukkan kepadatan deteksi, bukan luas terbakar. Awan, asap, jeda pengamatan, dan data yang belum diperbarui dapat memengaruhi hasil.
 
