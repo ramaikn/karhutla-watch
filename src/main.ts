@@ -14,6 +14,7 @@ import { NewsPanel } from "./ui/news-panel";
 import { dataUrl } from "./domain/data-url";
 import type { MapAppearance } from "./ui/basemap";
 import { initializeMapAppearance } from "./ui/map-appearance";
+import { initializeDetectionControls, type OverlayVisibility } from "./ui/detection-controls";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = layout;
 function node<T extends HTMLElement = HTMLElement>(id: string): T { return document.getElementById(id) as T; }
@@ -21,6 +22,7 @@ let snapshot: Snapshot | null = null;
 let map: HotspotMap | null = null;
 let mode: "points" | "heatmap" = "points";
 let appearance: MapAppearance = "dark";
+let overlayVisibility: OverlayVisibility = "normal";
 let loading = false;
 let mapFingerprint = "";
 const snapshotUrl = dataUrl("latest.json");
@@ -36,6 +38,7 @@ async function initializeMap(): Promise<void> {
     map.setNewsVisible(!node("berita").hidden);
     map.setMode(mode);
     map.setAppearance(appearance);
+    map.setOverlayVisibility(overlayVisibility);
     mapFingerprint = "";
     render();
   } catch {
@@ -117,6 +120,11 @@ initializeMapAppearance((selected) => {
   appearance = selected;
   node("map-error").hidden = true;
   map?.setAppearance(appearance);
+});
+initializeDetectionControls((visibility) => {
+  overlayVisibility = visibility;
+  map?.setOverlayVisibility(visibility);
+  document.querySelector<HTMLElement>(".map-legend")!.hidden = visibility === "off";
 });
 
 node("filters").addEventListener("submit", (event) => event.preventDefault());

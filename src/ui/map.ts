@@ -5,6 +5,8 @@ import { REGIONS } from "../domain/filters";
 import { element, formatDate } from "./dom";
 import { heatmapGeojson } from "../domain/heatmap";
 import { basemapPaint, basemapStyle, satelliteSource, type MapAppearance } from "./basemap";
+import { clusterPaint, densityPaint, observationPaint } from "./detection-style";
+import { overlayOpacity, type OverlayVisibility } from "./detection-controls";
 
 maplibregl.setWorkerCount(2);
 
@@ -16,6 +18,7 @@ export class HotspotMap {
   private region = "all";
   private mode: "points" | "heatmap" = "points";
   private appearance: MapAppearance = "dark";
+  private overlayVisibility: OverlayVisibility = "normal";
   private newsVisible = true;
 
   constructor(container: HTMLElement, onError: (message: string) => void) {
@@ -36,20 +39,16 @@ export class HotspotMap {
       this.ready = true;
       this.map.addSource("hotspots", { type: "geojson", data: this.geojson(), cluster: true, clusterRadius: 38, clusterMaxZoom: 8 });
       this.map.addSource("heatpoints", { type: "geojson", data: heatmapGeojson(this.points), maxzoom: 10 });
+      this.map.addSource("observations", { type: "geojson", data: this.geojson(), maxzoom: 16 });
       this.map.addLayer({
         id: "heatmap", type: "heatmap", source: "heatpoints",
         layout: { visibility: "none" },
-        paint: {
-          "heatmap-weight": ["get", "count"],
-          "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 2, 0.5, 8, 1.5, 14, 2],
-          "heatmap-radius": ["interpolate", ["linear"], ["zoom"], 2, 10, 8, 24, 14, 36],
-          "heatmap-opacity": 0.75,
-          "heatmap-color": ["interpolate", ["linear"], ["heatmap-density"], 0, "rgba(247,236,180,0)", 0.15, "#f7e3a1", 0.4, "#e9b75a", 0.65, "#d97939", 0.85, "#b9442a", 1, "#7d221d"],
-        },
+        paint: densityPaint(),
       });
-      this.map.addLayer({ id: "clusters", type: "circle", source: "hotspots", filter: ["has", "point_count"], paint: { "circle-color": "#d66d47", "circle-radius": ["step", ["get", "point_count"], 12, 30, 17, 150, 22], "circle-opacity": 0.9, "circle-stroke-color": "#f4c6a5", "circle-stroke-width": 1 } });
-      this.map.addLayer({ id: "points", type: "circle", source: "hotspots", filter: ["!", ["has", "point_count"]], paint: { "circle-color": ["match", ["get", "confidence"], "h", "#f16f59", "n", "#efa74e", "#d7cb81"], "circle-radius": 5, "circle-stroke-color": "#171b20", "circle-stroke-width": 1 } });
-      this.map.on("click", "points", (event) => {
+      this.map.addLayer({ id: "clusters", type: "circle", source: "hotspots", filter: ["has", "point_count"], paint: clusterPaint() });
+      this.map.addLayer({ id: "points", type: "circle", source: "hotspots", filter: ["!", ["has", "point_count"]], paint: observationPaint() });
+      this.map.addLayer({ id: "heatmap-observations", type: "circle", source: "observations", layout: { visibility: "none" }, paint: observationPaint(1, true) });
+      this.map.on("click", ["points", "heatmap-observations"], (event) => {
         const id = event.features?.[0]?.properties?.id;
         const point = this.points.find((item) => item.id === id);
         if (point) this.show(point);
@@ -62,12 +61,13 @@ export class HotspotMap {
           this.map.easeTo({ center: feature.geometry.coordinates as [number, number], zoom });
         } catch { onError("Kelompok deteksi belum dapat dibuka."); }
       });
-      for (const layer of ["points", "clusters"]) {
+      for (const layer of ["points", "clusters", "heatmap-observations"]) {
         this.map.on("mouseenter", layer, () => { this.map.getCanvas().style.cursor = "pointer"; });
         this.map.on("mouseleave", layer, () => { this.map.getCanvas().style.cursor = ""; });
       }
       this.fit(this.region);
       this.setMode(this.mode);
+      this.setOverlayVisibility(this.overlayVisibility);
       this.setAppearance(this.appearance);
     });
   }
@@ -83,14 +83,28 @@ export class HotspotMap {
       const data = this.geojson();
       (this.map.getSource("hotspots") as GeoJSONSource).setData(data);
       (this.map.getSource("heatpoints") as GeoJSONSource).setData(heatmapGeojson(points));
+      (this.map.getSource("observations") as GeoJSONSource).setData(data);
     }
   }
 
   setMode(mode: "points" | "heatmap"): void {
     this.mode = mode;
     if (!this.ready) return;
-    for (const id of ["clusters", "points"]) this.map.setLayoutProperty(id, "visibility", mode === "points" ? "visible" : "none");
-    this.map.setLayoutProperty("heatmap", "visibility", mode === "heatmap" ? "visible" : "none");
+    const visible = this.overlayVisibility !== "off";
+    for (const id of ["clusters", "points"]) this.map.setLayoutProperty(id, "visibility", visible && mode === "points" ? "visible" : "none");
+    for (const id of ["heatmap", "heatmap-observations"]) this.map.setLayoutProperty(id, "visibility", visible && mode === "heatmap" ? "visible" : "none");
+  }
+
+  setOverlayVisibility(visibility: OverlayVisibility): void {
+    this.overlayVisibility = visibility;
+    if (!this.ready) return;
+    if (visibility === "off") this.popup?.remove();
+    const opacity = overlayOpacity(visibility);
+    const paints = { clusters: clusterPaint(opacity), points: observationPaint(opacity), heatmap: densityPaint(opacity), "heatmap-observations": observationPaint(opacity, true) };
+    for (const [layer, paint] of Object.entries(paints)) {
+      for (const [property, value] of Object.entries(paint!)) this.map.setPaintProperty(layer, property, value);
+    }
+    this.setMode(this.mode);
   }
 
   setAppearance(appearance: MapAppearance): void {

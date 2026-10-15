@@ -54,6 +54,17 @@ try {
     const appearanceControls = await evaluate(`(() => { const box = document.querySelector('.map-appearance').getBoundingClientRect(); const zoom = document.querySelector('.maplibregl-ctrl-group').getBoundingClientRect(); const stage = document.getElementById('peta').getBoundingClientRect(); const summary = document.querySelector('.map-summary').getBoundingClientRect(); return { visible: box.top >= zoom.bottom && box.bottom < stage.bottom && box.left >= 0 && box.right <= innerWidth, avoidsSummary: box.left >= summary.right || box.top >= summary.bottom, active: document.querySelector('.map-appearance [aria-pressed="true"]').id }; })()`);
     assert(appearanceControls.visible && appearanceControls.avoidsSummary && appearanceControls.active === "map-dark", `Ikon mode bertabrakan atau default berubah pada ${width}: ${JSON.stringify(appearanceControls)}`);
     const countBeforeMode = await evaluate("document.getElementById('count').textContent");
+    for (const target of ["summary", "overlay"]) {
+      for (const visibility of ["dim", "off", "normal"]) {
+        await evaluate(`document.getElementById('toggle-${target}').click()`);
+        assert(await evaluate(`document.getElementById('toggle-${target}').dataset.visibility === '${visibility}'`), `Kontrol ${target} gagal menjadi ${visibility} pada ${width}`);
+        if (target === "summary") {
+          assert(await evaluate(`document.getElementById('count').hidden === ${visibility === "off"} && !document.getElementById('toggle-summary').hidden`), `Kartu deteksi tidak dapat disembunyikan/dipulihkan pada ${width}`);
+          const contained = await evaluate(`(() => { const card = document.querySelector('.map-summary').getBoundingClientRect(); return [...document.querySelectorAll('.map-summary button')].filter(el => el.getBoundingClientRect().width).every(el => el.getBoundingClientRect().right <= card.right); })()`);
+          assert(contained, `Kontrol kartu meluber pada ${width}`);
+        } else assert(await evaluate(`document.querySelector('.map-legend').hidden === ${visibility === "off"}`), `Legenda tidak mengikuti lapisan pada ${width}`);
+      }
+    }
     for (const appearance of ["natural", "clouds", "dark"]) {
       await evaluate(`document.getElementById('map-${appearance}').click()`);
       assert(await evaluate(`document.querySelectorAll('.map-appearance [aria-pressed="true"]').length === 1 && document.getElementById('map-${appearance}').getAttribute('aria-pressed') === 'true'`), `Ikon ${appearance} tidak aktif pada ${width}`);

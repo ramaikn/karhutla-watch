@@ -17,6 +17,7 @@ Peta interaktif titik panas Indonesia, peringkat provinsi, kualitas udara, berit
 - **Berita dari 25 media.** Setiap media memakai pencarian, rentang waktu, dan batas hasil yang sama. Artikel terbaru tampil paling atas, dengan pencarian judul atau penerbit.
 - **Cuaca seluruh Indonesia.** Cari di antara 83.762 desa/kelurahan pada 38 provinsi, lalu buka prakiraan resmi BMKG untuk lokasi pilihan.
 - **Filter dan ekspor.** Rentang 24 jam, 3 hari, atau 7 hari; wilayah, keyakinan, dan satelit; daftar deteksi, tren, serta unduhan CSV.
+- **Lapisan yang dapat disamarkan.** Ikon pada kartu deteksi mengganti normal, samar, dan tersembunyi. Ikon mata di sisi peta mengatur titik/heatmap secara terpisah. Kelompok deteksi memakai lingkaran kecil transparan. Heatmap memakai warna tegas dengan radius terbatas dan titik asli di semua tingkat zoom; pada zoom 8–11, kabut kepadatan memudar menjadi titik asli, bukan perkiraan luas terbakar.
 - **Responsif.** Desktop memiliki panel detail di kiri dan berita di kanan. Pada ponsel, tab mengganti satu panel di bawah peta tanpa menutup peta. Dialog About tersedia di kedua versi.
 - **Tanpa API AI berbayar.** Web dapat dihosting statis. Collector memperbarui snapshot secara terpisah.
 

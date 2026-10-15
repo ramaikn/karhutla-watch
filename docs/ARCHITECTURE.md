@@ -15,6 +15,7 @@
 | `src/ui/layout.ts`, `src/style.css`, `src/ui/workspace.ts`, `workspace-state.ts` | Desktop: panel terpisah. Mobile: satu panel di bawah peta, tab dan navigasi keyboard. Tinggi header diukur dengan ResizeObserver |
 | `src/ui/about.ts` | Dialog About native, tautan proyek/profil, penutupan dan pemulihan fokus |
 | `src/ui/map.ts`, `src/ui/basemap.ts`, `src/ui/map-appearance.ts` | MapLibre, OSM gelap/berwarna, citra satelit awan NASA GIBS, kontrol ikon, titik/heatmap/popup |
+| `src/ui/detection-style.ts`, `src/ui/detection-controls.ts` | Gaya kepadatan radius kecil, transisi ke observasi asli, kontrol normal/samar/mati untuk kartu dan lapisan secara terpisah |
 | `src/domain/filters.ts`, `normalize.ts`, `snapshot.ts`, `heatmap.ts` | Validasi dan pengolahan data |
 | `src/domain/rankings.ts`, `ranking-snapshot.ts`, `scripts/prepare-data.ts` | Point-in-polygon pada collector, 36 tabel siap tampil, validasi hasil |
 | `src/ui/ranking-panel.ts`, `news-panel.ts`, `src/domain/data-url.ts` | Panel ringan paralel, pembaruan tanpa mengosongkan data lama, URL mengikuti sumber snapshot |
@@ -33,6 +34,8 @@
 
 ## Keputusan penting
 
+- Heatmap membatasi bobot per sel dan memakai radius 6–14 piksel, intensitas tetap 0,85, serta warna kuning-oranye-merah yang tetap jelas. Titik observasi asli terlihat pada semua zoom agar deteksi terpisah tidak hilang akibat ambang kepadatan; pada zoom 8–11, kabut heatmap memudar menjadi titik asli. Agregasi tetap menyimpan jumlah deteksi, tidak membuat celah acak atau mengubah koordinat sumber. Mode Titik memakai kelompok beradius 8–12 piksel dengan isi transparan. Kartu deteksi dan lapisan mempunyai kontrol normal → samar → mati, masing-masing independen; ikon pemulihan kartu selalu terlihat. Legenda ikut disembunyikan ketika lapisan mati. UI lainnya tidak diubah.
+
 - Tiga mode dasar memakai ikon vertikal di bawah header dan kontrol zoom. Default tetap gelap. Pergantian hanya mengubah warna raster dan visibilitas citra, tanpa `setStyle`, sehingga posisi, popup, filter, sumber deteksi, dan heatmap tidak direset. Sumber NASA GIBS baru ditambahkan saat mode awan dipilih; raster berada di bawah deteksi. Citra VIIRS NOAA-20 True Color memakai kemarin UTC, batas zoom sumber 9, dan tanggal pada atribusi. Ini komposit harian dengan kemungkinan celah/jeda sumber, bukan awan langsung atau sebaran asap. Kegagalan citra mempertahankan OSM serta deteksi dan menampilkan pesan singkat.
 
 - Berita memakai pagination 20 artikel per halaman (`src/domain/news-page.ts`), pencarian mencakup seluruh snapshot. Pergantian halaman mengembalikan scroll ke awal berita; pembaruan otomatis mempertahankan halaman yang dipilih.
@@ -49,6 +52,8 @@
 - Jangan menaruh rahasia pada `VITE_*`. `.runtime` dan `.env*` bukan berkas publik.
 
 ## Pemeriksaan terakhir
+
+16 Oktober 2026, visibilitas deteksi dan heatmap: 46 test/298 pemeriksaan, TypeScript, build produksi, dan pemeriksaan browser pada 320, 390, 700, 768, 1024, dan 1440 piksel berhasil. Kontrol kartu/lapisan normal, samar, dan mati dapat dipulihkan tanpa mengubah hitungan. Heatmap diperiksa visual pada tampilan nasional dan setelah diperbesar: warna panas tetap tegas dan titik asli tetap terlihat, dengan celah mengikuti sebaran data. Pengaturan awal yang terlalu lemah diganti, bukan menyembunyikan deteksi. Tidak menambah dependensi.
 
 15 Oktober 2026, tiga mode peta: 43 test/281 pemeriksaan, TypeScript, build produksi, dan `git diff --check` berhasil. Chrome memeriksa 320, 390, 700, 768, 1024, dan 1440 piksel: ikon tidak bertabrakan, default gelap, pergantian mode dan heatmap tidak mengubah hitungan, serta panel, filter, About, dan fokus tetap berfungsi tanpa kesalahan browser. Citra NASA GIBS kemarin UTC berhasil dirender dan diperiksa secara visual. Dependensi tidak ditambah; peringatan ukuran bundle MapLibre yang sudah ada tetap muncul.
 
