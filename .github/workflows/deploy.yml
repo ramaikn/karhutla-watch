@@ -22,14 +22,21 @@ jobs:
       # Data dibaca dari raw GitHub agar pembaruan cron tidak perlu deploy ulang.
       VITE_DATA_URL: https://raw.githubusercontent.com/${{ github.repository }}/main/public/data/latest.json
     steps:
-      - name: Periksa token Cloudflare
-        run: |
-          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then echo "::error::Secret CLOUDFLARE_API_TOKEN belum dipasang. Lihat docs/DEPLOY.md."; exit 1; fi
+      # Tanpa token, deploy dilewati (bukan gagal) agar tidak mengirim email kegagalan di setiap push.
+      - name: Token Cloudflare belum dipasang
+        if: env.CLOUDFLARE_API_TOKEN == ''
+        run: echo "::notice::Deploy dilewati karena secret CLOUDFLARE_API_TOKEN belum dipasang. Lihat docs/DEPLOY.md."
       - uses: actions/checkout@v4
+        if: env.CLOUDFLARE_API_TOKEN != ''
       - uses: oven-sh/setup-bun@v2
+        if: env.CLOUDFLARE_API_TOKEN != ''
         with:
           bun-version: '1.4.2'
-      - run: bun install --frozen-lockfile --backend hardlink
-      - run: bun test
-      - run: bun run build
-      - run: bunx --bun wrangler deploy
+      - if: env.CLOUDFLARE_API_TOKEN != ''
+        run: bun install --frozen-lockfile --backend hardlink
+      - if: env.CLOUDFLARE_API_TOKEN != ''
+        run: bun test
+      - if: env.CLOUDFLARE_API_TOKEN != ''
+        run: bun run build
+      - if: env.CLOUDFLARE_API_TOKEN != ''
+        run: bunx --bun wrangler deploy
