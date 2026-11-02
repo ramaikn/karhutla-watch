@@ -8,7 +8,7 @@ test("visibilitas berputar normal, samar, mati tanpa mengubah mode peta", () => 
   expect(nextVisibility("dim")).toBe("off");
   expect(nextVisibility("off")).toBe("normal");
   expect(["normal", "dim", "off"].map((state) => overlayOpacity(state as "normal" | "dim" | "off"))).toEqual([1, 0.3, 0]);
-  expect(layout).toContain('id="toggle-summary"');
+  expect(layout).not.toContain('id="toggle-summary"');
   expect(layout).toContain('id="toggle-overlay"');
 });
 

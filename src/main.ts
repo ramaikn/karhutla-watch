@@ -43,6 +43,9 @@ async function initializeMap(): Promise<void> {
     map.setAppearance(appearance);
     map.setOverlayVisibility(overlayVisibility);
     map.setOverlayScale(layerScale);
+    // Alat peta berdampingan dengan tombol zoom agar tidak tertutup panel bawah.
+    const tools = document.querySelector(".map-tools");
+    if (tools) document.querySelector(".maplibregl-ctrl-top-right")?.prepend(tools);
     mapFingerprint = "";
     render();
   } catch {

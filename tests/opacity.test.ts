@@ -1,22 +1,22 @@
 import { expect, test } from "bun:test";
-import { MIN_OPACITY, OPACITY_COMPONENTS, STORAGE_KEY, defaultOpacity, loadOpacity, normalizeOpacity, saveOpacity } from "../src/ui/opacity-settings";
+import { MIN_OPACITY, STORAGE_KEY, clampOpacity, loadOpacity, saveOpacity } from "../src/ui/opacity-settings";
 import { layout } from "../src/ui/layout";
 
 test("nilai transparansi rusak atau di luar batas dipulihkan", () => {
-  const result = normalizeOpacity({ toolbar: 3, summary: 500, legend: "x", news: 42.4, unknown: 5 });
-  expect(result).toMatchObject({ toolbar: MIN_OPACITY, summary: 100, legend: 100, news: 42, detail: 100, layer: 100 });
-  expect(Object.keys(result)).toEqual(OPACITY_COMPONENTS.map((item) => item.id));
-  expect(normalizeOpacity(null)).toEqual(defaultOpacity());
+  expect(clampOpacity(3)).toBe(MIN_OPACITY);
+  expect(clampOpacity(500)).toBe(100);
+  expect(clampOpacity(42.4)).toBe(42);
+  expect(clampOpacity("x")).toBe(100);
 });
 
 test("penyimpanan gagal atau berisi JSON rusak tidak merusak aplikasi", () => {
-  expect(loadOpacity({ getItem: () => "{rusak" })).toEqual(defaultOpacity());
-  expect(loadOpacity(undefined)).toEqual(defaultOpacity());
+  expect(loadOpacity({ getItem: () => "{rusak" })).toBe(100);
+  expect(loadOpacity(undefined)).toBe(100);
   const values = new Map<string, string>();
-  saveOpacity({ setItem: (key, value) => void values.set(key, value) }, { ...defaultOpacity(), news: 60 });
-  expect(loadOpacity({ getItem: (key) => values.get(key) ?? null }).news).toBe(60);
+  saveOpacity({ setItem: (key, value) => void values.set(key, value) }, 60);
+  expect(loadOpacity({ getItem: (key) => values.get(key) ?? null })).toBe(60);
   expect(values.has(STORAGE_KEY)).toBe(true);
-  expect(() => saveOpacity({ setItem: () => { throw new Error("penuh"); } }, defaultOpacity())).not.toThrow();
+  expect(() => saveOpacity({ setItem: () => { throw new Error("penuh"); } }, 50)).not.toThrow();
 });
 
 test("tata letak memuat layar penuh, transparansi, heatmap bawaan, dan tanpa teks kepadatan", () => {

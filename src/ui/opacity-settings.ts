@@ -1,24 +1,7 @@
-// Tingkat opasitas (persen) tiap komponen peta. 100 = tampilan asli.
-export const OPACITY_COMPONENTS = [
-  { id: "toolbar", label: "Bilah atas" },
-  { id: "summary", label: "Kartu deteksi" },
-  { id: "controls", label: "Tombol peta" },
-  { id: "legend", label: "Legenda" },
-  { id: "detail", label: "Panel detail" },
-  { id: "news", label: "Panel berita" },
-  { id: "layer", label: "Heatmap dan titik" },
-] as const;
-
-export type OpacityId = (typeof OPACITY_COMPONENTS)[number]["id"];
-export type OpacitySettings = Record<OpacityId, number>;
-
+// Satu tingkat opasitas (persen) untuk semua komponen peta. 100 = tampilan asli.
 // Batas bawah menjaga komponen tetap dapat ditemukan di peta.
 export const MIN_OPACITY = 10;
 export const STORAGE_KEY = "karhutla-watch:opacity";
-
-export function defaultOpacity(): OpacitySettings {
-  return Object.fromEntries(OPACITY_COMPONENTS.map((item) => [item.id, 100])) as OpacitySettings;
-}
 
 export function clampOpacity(value: unknown): number {
   const number = typeof value === "number" ? value : Number.NaN;
@@ -26,22 +9,15 @@ export function clampOpacity(value: unknown): number {
 }
 
 // Data tersimpan dianggap tidak tepercaya: nilai rusak jatuh ke 100.
-export function normalizeOpacity(raw: unknown): OpacitySettings {
-  const source = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
-  const result = defaultOpacity();
-  for (const { id } of OPACITY_COMPONENTS) result[id] = clampOpacity(source[id]);
-  return result;
-}
-
-export function loadOpacity(storage: Pick<Storage, "getItem"> | undefined): OpacitySettings {
+export function loadOpacity(storage: Pick<Storage, "getItem"> | undefined): number {
   try {
     const text = storage?.getItem(STORAGE_KEY);
-    return normalizeOpacity(text ? JSON.parse(text) : null);
+    return clampOpacity(text ? Number(JSON.parse(text)) : null);
   } catch {
-    return defaultOpacity();
+    return 100;
   }
 }
 
-export function saveOpacity(storage: Pick<Storage, "setItem"> | undefined, settings: OpacitySettings): void {
-  try { storage?.setItem(STORAGE_KEY, JSON.stringify(settings)); } catch { /* penyimpanan dinonaktifkan; pengaturan berlaku sesi ini saja */ }
+export function saveOpacity(storage: Pick<Storage, "setItem"> | undefined, percent: number): void {
+  try { storage?.setItem(STORAGE_KEY, JSON.stringify(percent)); } catch { /* penyimpanan dinonaktifkan; berlaku sesi ini saja */ }
 }

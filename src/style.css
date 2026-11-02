@@ -12,7 +12,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 h2, h3, p { margin-top: 0; }
 h2 { font-size: 16px; font-weight: 650; margin-bottom: 0; }
 h3 { font-size: 13px; margin-bottom: 10px; }
-/* --surface-mix diatur per komponen (lihat bagian transparansi di bawah); 100% = tidak transparan. */
+/* --surface-mix mengikuti pengaturan transparansi umum (--mix); 100% = tidak transparan. */
 .surface { background: color-mix(in srgb, var(--surface) var(--surface-mix, 100%), transparent); border: 1px solid color-mix(in srgb, var(--line) var(--surface-mix, 100%), transparent); border-radius: 5px; }
 .workspace { position: relative; height: 100svh; min-height: 480px; --toolbar-bottom: 64px; }
 .map-stage, #map { width: 100%; height: 100%; }
@@ -52,15 +52,10 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: #30363
 .map-appearance button[aria-pressed="true"] { background: #3a424c; border-color: #737e8c; }
 .map-appearance svg { width: 20px; height: 20px; }
 .visibility-toggle { display: grid; place-items: center; flex-shrink: 0; }
-.map-summary .visibility-toggle { width: 28px; height: 32px; padding: 4px; background: transparent; border-color: transparent; }
 .visibility-toggle svg { width: 18px; height: 18px; }
 .visibility-slash { display: none; }
 .visibility-toggle[data-visibility="off"] .visibility-slash { display: block; }
 .visibility-toggle[data-visibility="dim"] { color: #e6b36c; }
-.map-summary[data-visibility="dim"] { background: #191d2266; border-color: #343a4366; }
-.map-summary[data-visibility="dim"] > :not(.visibility-toggle) { opacity: .3; }
-.map-summary[data-visibility="dim"]:hover > :not(.visibility-toggle), .map-summary[data-visibility="dim"]:focus-within > :not(.visibility-toggle) { opacity: 1; }
-.map-summary[data-visibility="off"] { padding: 3px; }
 .news-hidden .map-controls { right: 16px; }
 @media (min-width: 701px) and (max-width: 1000px) { .map-controls { right: 336px; } }
 .news-panel { position: absolute; top: calc(var(--toolbar-bottom) + 12px); right: 12px; bottom: 40px; width: 340px; z-index: 3; display: flex; flex-direction: column; overflow: hidden; }
@@ -132,22 +127,21 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: #30363
 @media (max-width: 700px) { .workspace.is-fullscreen .news-panel, .workspace.is-fullscreen .detail-panel, .workspace.is-fullscreen #panel-navigation { display: none; } }
 #toggle-fullscreen .exit-fullscreen, #toggle-fullscreen[aria-pressed="true"] .enter-fullscreen { display: none; }
 #toggle-fullscreen[aria-pressed="true"] .exit-fullscreen { display: block; }
-.map-appearance button[aria-expanded="true"] { background: #3a424c; border-color: #737e8c; }
 
-/* Transparansi per komponen: variabel --mix-* diisi dari panel pengaturan. */
-.map-toolbar { --surface-mix: var(--mix-toolbar, 100%); }
-.map-summary { --surface-mix: var(--mix-summary, 100%); }
-.map-appearance { --surface-mix: var(--mix-controls, 100%); }
-.map-legend { --surface-mix: var(--mix-legend, 100%); }
-.detail-panel { --surface-mix: var(--mix-detail, 100%); }
-.news-panel { --surface-mix: var(--mix-news, 100%); }
-.drawer-heading { background: color-mix(in srgb, var(--surface) var(--mix-detail, 100%), transparent); }
-.maplibregl-ctrl-group { background: color-mix(in srgb, var(--surface) var(--mix-controls, 100%), transparent); border-color: color-mix(in srgb, var(--line) var(--mix-controls, 100%), transparent); }
+/* Satu pengaturan transparansi untuk semua permukaan; --mix diisi dari panel pengaturan. */
+.map-toolbar, .map-summary, .map-appearance, .map-legend, .detail-panel, .news-panel { --surface-mix: var(--mix, 100%); }
+.drawer-heading { background: color-mix(in srgb, var(--surface) var(--mix, 100%), transparent); }
+.maplibregl-ctrl-group { background: color-mix(in srgb, var(--surface) var(--mix, 100%), transparent); border-color: color-mix(in srgb, var(--line) var(--mix, 100%), transparent); }
+.maplibregl-ctrl-top-right { display: flex; align-items: flex-start; }
+.map-tools button { display: grid; place-items: center; width: 29px; height: 29px; padding: 0; background: transparent; border: 0; border-radius: 0; }
+.map-tools button + button { border-top: 1px solid var(--line); }
+.map-tools button:hover { background: #30363e; }
+.map-tools button[aria-expanded="true"] { background: #3a424c; }
+.map-tools svg { width: 18px; height: 18px; }
 .filter-popover, .opacity-panel { --surface-mix: 100%; }
-.opacity-panel { position: absolute; top: 0; right: calc(100% + 8px); width: 250px; padding: 12px 14px 14px; display: grid; gap: 12px; }
+.opacity-panel { position: absolute; top: 0; right: calc(100% + 8px); width: 220px; padding: 12px 14px 14px; display: grid; gap: 12px; }
 .opacity-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .opacity-heading h3 { margin: 0; }
-.opacity-row { gap: 6px; }
 .opacity-label { display: flex; justify-content: space-between; gap: 10px; }
 .opacity-label output { color: var(--muted); font-variant-numeric: tabular-nums; }
 .opacity-row input[type="range"] { min-height: 0; padding: 0; width: 100%; accent-color: #e6b36c; background: transparent; border: 0; }
@@ -169,7 +163,7 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: #30363
   .filters { order: 0; grid-column: 2; grid-row: 1; width: 100%; gap: 4px; }
   .filters select, .filter-options > summary { min-height: 40px; }.filter-options > summary { display: flex; align-items: center; justify-content: center; width: 36px; padding: 0; }
   .filter-popover { left: auto; right: -40px; max-width: calc(100vw - 32px); }
-  .map-summary { top: calc(var(--toolbar-bottom) + 8px); left: 8px; gap: 4px; padding: 4px; max-width: calc(100% - 64px); }.map-summary > strong { font-size: 16px; }.view-toggle { padding-left: 4px; margin-left: 0; }.view-toggle button { font-size: 11px; padding: 5px; min-height: 36px; }.map-summary .visibility-toggle { width: 24px; min-height: 36px; }
+  .map-summary { top: calc(var(--toolbar-bottom) + 8px); left: 8px; gap: 4px; padding: 4px; max-width: calc(100% - 64px); }.map-summary > strong { font-size: 16px; }.view-toggle { padding-left: 4px; margin-left: 0; }.view-toggle button { font-size: 11px; padding: 5px; min-height: 36px; }
   .news-panel, .detail-panel { position: relative; top: auto; left: auto; right: auto; bottom: auto; width: 100%; max-width: none; min-height: 32svh; border-radius: 0; border-left: 0; border-right: 0; overflow: visible; }
   .news-scroll { overflow: visible; }#close-news, #close-detail { display: none; }
   .drawer-heading { position: static; }
