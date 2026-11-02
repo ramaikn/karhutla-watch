@@ -13,7 +13,7 @@ h2, h3, p { margin-top: 0; }
 h2 { font-size: 16px; font-weight: 650; margin-bottom: 0; }
 h3 { font-size: 13px; margin-bottom: 10px; }
 /* --surface-mix mengikuti pengaturan transparansi umum (--mix); 100% = tidak transparan. */
-.surface { background: color-mix(in srgb, var(--surface) var(--surface-mix, 100%), transparent); border: 1px solid color-mix(in srgb, var(--line) var(--surface-mix, 100%), transparent); border-radius: 5px; }
+.surface { background: color-mix(in srgb, var(--surface) var(--surface-mix, 100%), transparent); border: 1px solid var(--line); border-radius: 5px; }
 .workspace { position: relative; height: 100svh; min-height: 480px; --toolbar-bottom: 64px; }
 .map-stage, #map { width: 100%; height: 100%; }
 .map-stage { position: relative; }
@@ -51,7 +51,7 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: var(--
 .map-appearance { display: flex; flex-direction: column; padding: 2px; gap: 2px; }
 .map-appearance button { display: grid; place-items: center; width: 36px; height: 40px; padding: 8px; background: transparent; border-color: transparent; }
 .map-appearance button:hover { background: var(--btn-hover, #30363e); }
-.map-appearance button[aria-pressed="true"] { background: var(--btn-active, #3a424c); border-color: #737e8c; }
+.map-appearance button[aria-pressed="true"] { background: var(--btn-active, #3a424c); border-color: var(--btn-edge, #737e8c); }
 .map-appearance svg { width: 20px; height: 20px; }
 .visibility-toggle { display: grid; place-items: center; flex-shrink: 0; }
 .visibility-toggle svg { width: 18px; height: 18px; }
@@ -120,7 +120,7 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: var(--
 .maplibregl-popup-close-button { color: var(--text); font-size: 18px; }
 .maplibregl-ctrl-top-right { top: calc(var(--toolbar-bottom) + 6px); right: 356px; }.news-hidden .maplibregl-ctrl-top-right { right: 6px; }
 .maplibregl-ctrl-group { background: var(--surface); border: 1px solid var(--line); box-shadow: none; }.maplibregl-ctrl-group button + button { border-top-color: var(--line); }.maplibregl-ctrl-icon { filter: invert(1); }
-.maplibregl-ctrl-attrib { font-size: 10px !important; background: #191d22e8 !important; color: var(--muted); }.maplibregl-ctrl-attrib a { color: var(--muted); }
+.maplibregl-ctrl-attrib { font-size: 10px !important; background: color-mix(in srgb, #191d22 var(--mix, 100%), transparent) !important; color: var(--muted); }.maplibregl-ctrl-attrib a { color: var(--muted); }
 @media (max-width: 1000px) { .map-toolbar { gap: 8px; }.brand { font-size: 13px; }.brand img { display: none; }nav { gap: 0; }nav button { padding: 7px; }#region { width: 145px; }.news-panel { width: 310px; }.maplibregl-ctrl-top-right { right: 326px; } }
 /* Layar penuh: kelas CSS menjamin tampilan di peramban tanpa Fullscreen API. */
 .workspace.is-fullscreen { position: fixed; inset: 0; z-index: 50; height: 100dvh; min-height: 0; background: #101317; }
@@ -132,6 +132,9 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: var(--
 
 /* Satu pengaturan transparansi untuk semua permukaan; --mix diisi dari panel pengaturan. */
 .workspace {
+  --line: color-mix(in srgb, #343a43 var(--mix, 100%), transparent);
+  --btn-edge: color-mix(in srgb, #737e8c var(--mix, 100%), transparent);
+  scrollbar-color: color-mix(in srgb, #59616b var(--mix, 100%), transparent) transparent;
   --btn: color-mix(in srgb, #23282f var(--mix, 100%), transparent);
   --btn-hover: color-mix(in srgb, #30363e var(--mix, 100%), transparent);
   --btn-active: color-mix(in srgb, #3a424c var(--mix, 100%), transparent);
@@ -140,14 +143,14 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: var(--
 .surface { backdrop-filter: blur(4px); }
 .map-toolbar, .map-summary, .map-appearance, .map-legend, .detail-panel, .news-panel { --surface-mix: var(--mix, 100%); }
 .drawer-heading { background: color-mix(in srgb, var(--surface) var(--mix, 100%), transparent); }
-.maplibregl-ctrl-group { background: color-mix(in srgb, var(--surface) var(--mix, 100%), transparent); border-color: color-mix(in srgb, var(--line) var(--mix, 100%), transparent); }
+.maplibregl-ctrl-group { background: color-mix(in srgb, var(--surface) var(--mix, 100%), transparent); border-color: var(--line); }
 .maplibregl-ctrl-top-right { display: flex; align-items: flex-start; }
 .map-tools button { display: grid; place-items: center; width: 29px; height: 29px; padding: 0; background: transparent; border: 0; border-radius: 0; }
 .map-tools button + button { border-top: 1px solid var(--line); }
 .map-tools button:hover { background: var(--btn-hover, #30363e); }
 .map-tools button[aria-expanded="true"] { background: var(--btn-active, #3a424c); }
 .map-tools svg { width: 18px; height: 18px; }
-.filter-popover, .opacity-panel { --surface-mix: 100%; }
+.filter-popover, .opacity-panel { --surface-mix: 100%; --line: #343a43; --btn: #23282f; --btn-hover: #30363e; --btn-active: #3a424c; --field: #11151a; }
 .opacity-panel { position: absolute; top: 0; right: calc(100% + 8px); width: 220px; padding: 12px 14px 14px; display: grid; gap: 12px; }
 .opacity-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .opacity-heading h3 { margin: 0; }
