@@ -12,7 +12,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 h2, h3, p { margin-top: 0; }
 h2 { font-size: 16px; font-weight: 650; margin-bottom: 0; }
 h3 { font-size: 13px; margin-bottom: 10px; }
-.surface { background: var(--surface); border: 1px solid var(--line); border-radius: 5px; }
+/* --surface-mix diatur per komponen (lihat bagian transparansi di bawah); 100% = tidak transparan. */
+.surface { background: color-mix(in srgb, var(--surface) var(--surface-mix, 100%), transparent); border: 1px solid color-mix(in srgb, var(--line) var(--surface-mix, 100%), transparent); border-radius: 5px; }
 .workspace { position: relative; height: 100svh; min-height: 480px; --toolbar-bottom: 64px; }
 .map-stage, #map { width: 100%; height: 100%; }
 .map-stage { position: relative; }
@@ -44,7 +45,8 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: #30363
 .view-toggle { display: flex; gap: 1px; border-left: 1px solid var(--line); padding-left: 8px; margin-left: 4px; }
 .view-toggle button { border-color: transparent; background: transparent; padding: 5px 8px; }
 .view-toggle button[aria-pressed="true"] { background: #3a424c; }
-.map-appearance { position: absolute; top: calc(var(--toolbar-bottom) + 88px); right: 366px; z-index: 2; display: flex; flex-direction: column; padding: 2px; gap: 2px; }
+.map-controls { position: absolute; top: calc(var(--toolbar-bottom) + 88px); right: 366px; z-index: 2; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.map-appearance { display: flex; flex-direction: column; padding: 2px; gap: 2px; }
 .map-appearance button { display: grid; place-items: center; width: 36px; height: 40px; padding: 8px; background: transparent; border-color: transparent; }
 .map-appearance button:hover { background: #30363e; }
 .map-appearance button[aria-pressed="true"] { background: #3a424c; border-color: #737e8c; }
@@ -59,8 +61,8 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: #30363
 .map-summary[data-visibility="dim"] > :not(.visibility-toggle) { opacity: .3; }
 .map-summary[data-visibility="dim"]:hover > :not(.visibility-toggle), .map-summary[data-visibility="dim"]:focus-within > :not(.visibility-toggle) { opacity: 1; }
 .map-summary[data-visibility="off"] { padding: 3px; }
-.news-hidden .map-appearance { right: 16px; }
-@media (min-width: 701px) and (max-width: 1000px) { .map-appearance { right: 336px; } }
+.news-hidden .map-controls { right: 16px; }
+@media (min-width: 701px) and (max-width: 1000px) { .map-controls { right: 336px; } }
 .news-panel { position: absolute; top: calc(var(--toolbar-bottom) + 12px); right: 12px; bottom: 40px; width: 340px; z-index: 3; display: flex; flex-direction: column; overflow: hidden; }
 .section-heading, .drawer-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .section-heading > span { color: var(--muted); font-size: 11px; }
@@ -123,6 +125,32 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: #30363
 .maplibregl-ctrl-group { background: var(--surface); border: 1px solid var(--line); box-shadow: none; }.maplibregl-ctrl-group button + button { border-top-color: var(--line); }.maplibregl-ctrl-icon { filter: invert(1); }
 .maplibregl-ctrl-attrib { font-size: 10px !important; background: #191d22e8 !important; color: var(--muted); }.maplibregl-ctrl-attrib a { color: var(--muted); }
 @media (max-width: 1000px) { .map-toolbar { gap: 8px; }.brand { font-size: 13px; }.brand img { display: none; }nav { gap: 0; }nav button { padding: 7px; }#region { width: 145px; }.news-panel { width: 310px; }.maplibregl-ctrl-top-right { right: 326px; } }
+/* Layar penuh: kelas CSS menjamin tampilan di peramban tanpa Fullscreen API. */
+.workspace.is-fullscreen { position: fixed; inset: 0; z-index: 50; height: 100dvh; min-height: 0; background: #101317; }
+.workspace.is-fullscreen .map-stage { height: 100%; min-height: 0; }
+.workspace.is-fullscreen .news-panel, .workspace.is-fullscreen .detail-panel { max-height: none; }
+@media (max-width: 700px) { .workspace.is-fullscreen .news-panel, .workspace.is-fullscreen .detail-panel, .workspace.is-fullscreen #panel-navigation { display: none; } }
+#toggle-fullscreen .exit-fullscreen, #toggle-fullscreen[aria-pressed="true"] .enter-fullscreen { display: none; }
+#toggle-fullscreen[aria-pressed="true"] .exit-fullscreen { display: block; }
+.map-appearance button[aria-expanded="true"] { background: #3a424c; border-color: #737e8c; }
+
+/* Transparansi per komponen: variabel --mix-* diisi dari panel pengaturan. */
+.map-toolbar { --surface-mix: var(--mix-toolbar, 100%); }
+.map-summary { --surface-mix: var(--mix-summary, 100%); }
+.map-appearance { --surface-mix: var(--mix-controls, 100%); }
+.map-legend { --surface-mix: var(--mix-legend, 100%); }
+.detail-panel { --surface-mix: var(--mix-detail, 100%); }
+.news-panel { --surface-mix: var(--mix-news, 100%); }
+.drawer-heading { background: color-mix(in srgb, var(--surface) var(--mix-detail, 100%), transparent); }
+.maplibregl-ctrl-group { background: color-mix(in srgb, var(--surface) var(--mix-controls, 100%), transparent); border-color: color-mix(in srgb, var(--line) var(--mix-controls, 100%), transparent); }
+.filter-popover, .opacity-panel { --surface-mix: 100%; }
+.opacity-panel { position: absolute; top: 0; right: calc(100% + 8px); width: 250px; padding: 12px 14px 14px; display: grid; gap: 12px; }
+.opacity-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.opacity-heading h3 { margin: 0; }
+.opacity-row { gap: 6px; }
+.opacity-label { display: flex; justify-content: space-between; gap: 10px; }
+.opacity-label output { color: var(--muted); font-variant-numeric: tabular-nums; }
+.opacity-row input[type="range"] { min-height: 0; padding: 0; width: 100%; accent-color: #e6b36c; background: transparent; border: 0; }
 .about-dialog { width: min(440px, calc(100% - 32px)); max-height: calc(100svh - 32px); padding: 20px; color: var(--text); overflow: auto; }
 .about-dialog::backdrop { background: #0008; }
 .about-dialog p { font-size: 13px; line-height: 1.7; color: var(--muted); margin: 16px 0; }
@@ -145,8 +173,8 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: #30363
   .news-panel, .detail-panel { position: relative; top: auto; left: auto; right: auto; bottom: auto; width: 100%; max-width: none; min-height: 32svh; border-radius: 0; border-left: 0; border-right: 0; overflow: visible; }
   .news-scroll { overflow: visible; }#close-news, #close-detail { display: none; }
   .drawer-heading { position: static; }
-  .map-legend { bottom: 38px; left: 8px; gap: 7px; font-size: 9px; max-width: calc(100% - 16px); }.map-caution { flex-basis: 100%; }
+  .map-legend { bottom: 38px; left: 8px; gap: 7px; font-size: 9px; max-width: calc(100% - 16px); }
   .maplibregl-ctrl-top-right, .news-hidden .maplibregl-ctrl-top-right { top: calc(var(--toolbar-bottom) + 8px); right: 0; }
-  .map-appearance, .news-hidden .map-appearance { right: 8px; }
+  .map-controls, .news-hidden .map-controls { right: 8px; }
   .map-message { top: calc(var(--toolbar-bottom) + 64px); left: 8px; }.error-message { top: calc(var(--toolbar-bottom) + 112px); left: 8px; }
 }

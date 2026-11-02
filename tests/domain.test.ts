@@ -10,7 +10,7 @@ import { readPublicCsv } from "../scripts/firms";
 import { decodeSnapshot, encodeSnapshot } from "../src/domain/snapshot";
 import type { Snapshot } from "../src/domain/types";
 import { heatmapGeojson } from "../src/domain/heatmap";
-import { basemapStyle } from "../src/ui/basemap";
+import { basemapPaint, basemapStyle } from "../src/ui/basemap";
 
 const now = Date.parse("2026-10-12T12:00:00Z");
 const point: Hotspot = { id: "one", latitude: -1, longitude: 114, observedAt: "2026-10-12T10:00:00Z", confidence: "n", sensor: "VIIRS_NOAA20_NRT", frp: 3, dayNight: "D" };
@@ -51,7 +51,7 @@ describe("FIRMS dan penyimpanan", () => {
 });
 
 describe("filter dan status", () => {
-  test("peta dasar tanpa kunci memakai OSM dengan dark mode pada raster saja", () => {
+  test("peta dasar tanpa kunci memakai OSM, berwarna secara default, dark mode hanya pada raster", () => {
     const style = basemapStyle();
     expect(style.sources.osm.type).toBe("raster");
     expect(JSON.stringify(style)).toContain("https://tile.openstreetmap.org/{z}/{x}/{y}.png");
@@ -59,7 +59,8 @@ describe("filter dan status", () => {
     const base = style.layers.find((layer) => layer.id === "base");
     expect(base?.type).toBe("raster");
     if (base?.type !== "raster") throw new Error("Layer raster tidak tersedia");
-    expect(base.paint?.["raster-brightness-min"]).toBeGreaterThan(base.paint?.["raster-brightness-max"] as number);
+    expect(base.paint?.["raster-saturation"]).toBe(0);
+    expect(basemapPaint("dark")?.["raster-brightness-min"]).toBeGreaterThan(basemapPaint("dark")?.["raster-brightness-max"] as number);
   });
   test("heatmap mempertahankan jumlah deteksi setelah agregasi", () => {
     const heatmap = heatmapGeojson([point, { ...point, id: "close", longitude: 114.001 }, { ...point, id: "far", longitude: 115 }]);

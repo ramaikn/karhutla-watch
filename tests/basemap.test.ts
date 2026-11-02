@@ -2,10 +2,10 @@ import { expect, test } from "bun:test";
 import { basemapPaint, basemapStyle, satelliteSource } from "../src/ui/basemap";
 import { layout } from "../src/ui/layout";
 
-test("peta awal tetap gelap dan tidak mengunduh citra satelit", () => {
+test("peta awal berwarna tanpa awan dan tidak mengunduh citra satelit", () => {
   const style = basemapStyle();
   expect(Object.keys(style.sources)).toEqual(["osm"]);
-  expect(style.layers.find((layer) => layer.id === "base")).toMatchObject({ paint: basemapPaint("dark") });
+  expect(style.layers.find((layer) => layer.id === "base")).toMatchObject({ paint: basemapPaint("natural") });
   expect(basemapPaint("dark")).toMatchObject({ "raster-saturation": -1, "raster-brightness-min": 0.85, "raster-brightness-max": 0.08 });
 });
 
@@ -22,10 +22,10 @@ test("citra memakai kemarin UTC, urutan tile WMTS, dan resolusi sumber yang bena
   expect(satelliteSource(new Date("2024-03-01T12:00:00Z")).tiles?.[0]).toContain("/2024-02-29/");
 });
 
-test("tiga ikon mode memiliki nama aksesibel dan hanya gelap yang aktif", () => {
+test("tiga ikon mode memiliki nama aksesibel dan hanya berwarna yang aktif", () => {
   for (const mode of ["dark", "natural", "clouds"]) expect(layout).toContain(`id="map-${mode}"`);
-  expect(layout).toMatch(/id="map-dark"[^>]+aria-pressed="true"/);
-  expect(layout).toMatch(/id="map-natural"[^>]+aria-pressed="false"/);
+  expect(layout).toMatch(/id="map-dark"[^>]+aria-pressed="false"/);
+  expect(layout).toMatch(/id="map-natural"[^>]+aria-pressed="true"/);
   expect(layout).toMatch(/id="map-clouds"[^>]+aria-pressed="false"/);
   expect(layout).toContain("bukan peta asap");
 });

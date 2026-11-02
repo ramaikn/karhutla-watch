@@ -14,15 +14,18 @@ import { NewsPanel } from "./ui/news-panel";
 import { dataUrl } from "./domain/data-url";
 import type { MapAppearance } from "./ui/basemap";
 import { initializeMapAppearance } from "./ui/map-appearance";
+import { initializeFullscreen } from "./ui/fullscreen";
+import { initializeOpacityPanel } from "./ui/opacity-panel";
 import { initializeDetectionControls, type OverlayVisibility } from "./ui/detection-controls";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = layout;
 function node<T extends HTMLElement = HTMLElement>(id: string): T { return document.getElementById(id) as T; }
 let snapshot: Snapshot | null = null;
 let map: HotspotMap | null = null;
-let mode: "points" | "heatmap" = "points";
-let appearance: MapAppearance = "dark";
+let mode: "points" | "heatmap" = "heatmap";
+let appearance: MapAppearance = "natural";
 let overlayVisibility: OverlayVisibility = "normal";
+let layerScale = 1;
 let loading = false;
 let mapFingerprint = "";
 const snapshotUrl = dataUrl("latest.json");
@@ -39,6 +42,7 @@ async function initializeMap(): Promise<void> {
     map.setMode(mode);
     map.setAppearance(appearance);
     map.setOverlayVisibility(overlayVisibility);
+    map.setOverlayScale(layerScale);
     mapFingerprint = "";
     render();
   } catch {
@@ -105,14 +109,18 @@ async function load(): Promise<void> {
   } finally { loading = false; button.disabled = false; button.textContent = "Muat ulang data"; }
 }
 
+// Legenda warna hanya relevan untuk titik; heatmap memakai warna kepadatan.
+function updateLegend(): void {
+  document.querySelector<HTMLElement>(".map-legend")!.hidden = mode === "heatmap" || overlayVisibility === "off";
+}
+
 for (const selected of ["points", "heatmap"] as const) {
   node(`view-${selected}`).addEventListener("click", () => {
     mode = selected;
     map?.setMode(mode);
     node("view-points").setAttribute("aria-pressed", String(mode === "points"));
     node("view-heatmap").setAttribute("aria-pressed", String(mode === "heatmap"));
-    document.querySelector<HTMLElement>(".legend")!.hidden = mode === "heatmap";
-    node("heatmap-legend").hidden = mode !== "heatmap";
+    updateLegend();
   });
 }
 
@@ -124,7 +132,7 @@ initializeMapAppearance((selected) => {
 initializeDetectionControls((visibility) => {
   overlayVisibility = visibility;
   map?.setOverlayVisibility(visibility);
-  document.querySelector<HTMLElement>(".map-legend")!.hidden = visibility === "off";
+  updateLegend();
 });
 
 node("filters").addEventListener("submit", (event) => event.preventDefault());
@@ -149,6 +157,8 @@ node("download").addEventListener("click", () => {
   setTimeout(() => URL.revokeObjectURL(url), 1_000);
 });
 initializeWorkspace(() => map);
+initializeFullscreen(document.querySelector<HTMLElement>(".workspace")!, node<HTMLButtonElement>("toggle-fullscreen"));
+initializeOpacityPanel(document.querySelector<HTMLElement>(".workspace")!, (scale) => { layerScale = scale; map?.setOverlayScale(scale); });
 void load();
 void initializeMap();
 // Hitungan waktu dan status kedaluwarsa tetap benar jika tab dibiarkan terbuka.

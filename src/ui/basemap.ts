@@ -20,7 +20,7 @@ export function satelliteSource(now = new Date()): RasterSourceSpecification {
   };
 }
 
-// OSM tanpa kunci. Pembalikan terang/gelap hanya pada raster, bukan titik panas.
+// OSM tanpa kunci, tampil berwarna secara default. Mode gelap hanya membalik raster, bukan titik panas.
 export function basemapStyle(): StyleSpecification {
   return {
     version: 8,
@@ -34,10 +34,10 @@ export function basemapStyle(): StyleSpecification {
       },
     },
     layers: [
-      { id: "background", type: "background", paint: { "background-color": "#101317" } },
+      { id: "background", type: "background", paint: { "background-color": "#aad3df" } },
       {
         id: "base", type: "raster", source: "osm",
-        paint: basemapPaint("dark"),
+        paint: basemapPaint("natural"),
       },
     ],
   };

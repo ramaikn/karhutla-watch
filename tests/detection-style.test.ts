@@ -27,5 +27,5 @@ test("kelompok berupa lingkaran kecil transparan dan mode samar berlaku ke semua
   expect(clusterPaint(0.3)?.["circle-opacity"]).toBeCloseTo(0.048);
   expect(observationPaint(0.3)?.["circle-opacity"]).toBeCloseTo(0.255);
   expect(densityPaint(0)?.["heatmap-opacity"]).toEqual(["interpolate", ["linear"], ["zoom"], 0, 0, 8, 0, 11, 0]);
-  expect(layout).toContain("Kepadatan deteksi, bukan luas terbakar");
+  expect(layout).not.toContain("Kepadatan deteksi, bukan luas terbakar");
 });

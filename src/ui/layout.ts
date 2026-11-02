@@ -26,14 +26,21 @@ export const layout = `
 
     <div class="map-summary surface" aria-label="Jumlah deteksi">
       <strong id="count">…</strong><span>deteksi</span>
-      <div class="view-toggle" role="group" aria-label="Tampilan peta"><button id="view-points" type="button" aria-pressed="true">Titik</button><button id="view-heatmap" type="button" aria-pressed="false">Heatmap</button></div>
+      <div class="view-toggle" role="group" aria-label="Tampilan peta"><button id="view-points" type="button" aria-pressed="false">Titik</button><button id="view-heatmap" type="button" aria-pressed="true">Heatmap</button></div>
       <button id="toggle-summary" class="visibility-toggle" type="button" aria-label="Kartu deteksi: normal. Ubah menjadi samar" title="Kartu deteksi: normal. Ubah menjadi samar" data-visibility="normal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M3 8V4h4M17 4h4v4M21 16v4h-4M7 20H3v-4"/><path class="visibility-slash" d="m3 3 18 18"/></svg></button>
     </div>
+    <div class="map-controls">
     <div class="map-appearance surface" role="group" aria-label="Mode peta dasar">
-      <button id="map-dark" type="button" aria-label="Peta gelap" title="Peta gelap" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 13.4A9 9 0 0 1 10.6 3.2a9 9 0 1 0 10.2 10.2Z"/></svg></button>
-      <button id="map-natural" type="button" aria-label="Peta berwarna" title="Peta berwarna" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2Z M9 3v16M15 5v16"/></svg></button>
+      <button id="map-dark" type="button" aria-label="Peta gelap" title="Peta gelap" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 13.4A9 9 0 0 1 10.6 3.2a9 9 0 1 0 10.2 10.2Z"/></svg></button>
+      <button id="map-natural" type="button" aria-label="Peta berwarna" title="Peta berwarna" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2Z M9 3v16M15 5v16"/></svg></button>
       <button id="map-clouds" type="button" aria-label="Citra satelit dan awan, komposit harian kemarin UTC, bukan peta asap" title="Citra satelit & awan · kemarin UTC" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4 4 0 1 1 .5-8A6 6 0 0 1 19 12a3 3 0 0 1-1 6Z"/></svg></button>
       <button id="toggle-overlay" class="visibility-toggle" type="button" aria-label="Lapisan deteksi: normal. Ubah menjadi samar" title="Lapisan deteksi: normal. Ubah menjadi samar" data-visibility="normal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path class="visibility-slash" d="m3 3 18 18"/></svg></button>
+    </div>
+    <div class="map-appearance surface" role="group" aria-label="Alat peta">
+      <button id="toggle-fullscreen" type="button" aria-label="Peta layar penuh" title="Peta layar penuh" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="enter-fullscreen" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="exit-fullscreen" d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg></button>
+      <button id="toggle-opacity" type="button" aria-label="Pengaturan transparansi" title="Pengaturan transparansi" aria-controls="opacity-panel" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.2 6 10.5a6 6 0 0 1-12 0C6 9.2 12 3 12 3Z"/><path d="M12 7.5v12" stroke-dasharray="2 2"/></svg></button>
+    </div>
+    <div id="opacity-panel" class="opacity-panel surface" role="group" aria-label="Transparansi komponen" hidden></div>
     </div>
     <p id="load-error" class="error-message surface" role="alert" hidden></p>
     <div id="map-empty" class="map-message surface" role="status" hidden></div>
@@ -67,7 +74,7 @@ export const layout = `
         <div class="official-links"><a href="https://data.bmkg.go.id/prakiraan-cuaca/" target="_blank" rel="noopener noreferrer">Prakiraan BMKG ↗</a><a href="https://github.com/cahyadsn/wilayah" target="_blank" rel="noopener noreferrer">Referensi wilayah ↗</a><a href="./data/locations-LICENSE.txt" target="_blank" rel="noopener noreferrer">Lisensi daftar wilayah ↗</a></div>
       </section>
     </aside>
-    <div class="map-legend surface"><div class="legend" aria-label="Keyakinan deteksi"><span><i class="dot high"></i>Tinggi</span><span><i class="dot nominal"></i>Nominal</span><span><i class="dot low"></i>Rendah</span></div><span id="heatmap-legend" hidden>Kepadatan deteksi, bukan luas terbakar</span></div>
+    <div class="map-legend surface" hidden><div class="legend" aria-label="Keyakinan deteksi"><span><i class="dot high"></i>Tinggi</span><span><i class="dot nominal"></i>Nominal</span><span><i class="dot low"></i>Rendah</span></div></div>
   </section>
 
   <aside id="berita" class="news-panel surface" aria-labelledby="news-title">

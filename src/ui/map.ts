@@ -16,9 +16,11 @@ export class HotspotMap {
   private ready = false;
   private popup: maplibregl.Popup | null = null;
   private region = "all";
-  private mode: "points" | "heatmap" = "points";
-  private appearance: MapAppearance = "dark";
+  private mode: "points" | "heatmap" = "heatmap";
+  private appearance: MapAppearance = "natural";
   private overlayVisibility: OverlayVisibility = "normal";
+  // Pengali dari pengaturan transparansi pengguna, bertumpuk dengan mode samar.
+  private overlayScale = 1;
   private newsVisible = true;
 
   constructor(container: HTMLElement, onError: (message: string) => void) {
@@ -99,12 +101,17 @@ export class HotspotMap {
     this.overlayVisibility = visibility;
     if (!this.ready) return;
     if (visibility === "off") this.popup?.remove();
-    const opacity = overlayOpacity(visibility);
+    const opacity = overlayOpacity(visibility) * this.overlayScale;
     const paints = { clusters: clusterPaint(opacity), points: observationPaint(opacity), heatmap: densityPaint(opacity), "heatmap-observations": observationPaint(opacity, true) };
     for (const [layer, paint] of Object.entries(paints)) {
       for (const [property, value] of Object.entries(paint!)) this.map.setPaintProperty(layer, property, value);
     }
     this.setMode(this.mode);
+  }
+
+  setOverlayScale(scale: number): void {
+    this.overlayScale = scale;
+    this.setOverlayVisibility(this.overlayVisibility);
   }
 
   setAppearance(appearance: MapAppearance): void {
