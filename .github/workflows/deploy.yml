@@ -1,0 +1,35 @@
+name: Deploy ke Cloudflare
+on:
+  push:
+    branches: [main]
+    # Commit data bot dan dokumentasi tidak mengubah tampilan situs.
+    paths-ignore:
+      - 'public/data/**'
+      - 'docs/**'
+      - '**.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      # Data dibaca dari raw GitHub agar pembaruan cron tidak perlu deploy ulang.
+      VITE_DATA_URL: https://raw.githubusercontent.com/${{ github.repository }}/main/public/data/latest.json
+    steps:
+      - name: Periksa token Cloudflare
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then echo "::error::Secret CLOUDFLARE_API_TOKEN belum dipasang. Lihat docs/DEPLOY.md."; exit 1; fi
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.2'
+      - run: bun install --frozen-lockfile --backend hardlink
+      - run: bun test
+      - run: bun run build
+      - run: bunx --bun wrangler deploy

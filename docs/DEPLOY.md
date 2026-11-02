@@ -29,6 +29,19 @@ Workflow melakukan pengujian, pengambilan data, persiapan ranking/berita, build,
 
 File snapshot publik akan memiliki riwayat Git jika cron melakukan commit rutin. Pantau ukuran repositori dan kuota Actions/cache. Ini solusi awal untuk data tujuh hari, bukan arsip jangka panjang. Skala besar lebih tepat memakai penyimpanan objek atau layanan data tersendiri. Jangan mempublikasikan repositori induk lamaran.
 
+## Deploy otomatis (GitHub Actions)
+
+Workflow `.github/workflows/deploy.yml` men-deploy ke Cloudflare setiap push ke `main` (kecuali perubahan data dan dokumentasi). Pasang sekali:
+
+1. Cloudflare dashboard → My Profile → API Tokens → Create Token → template "Edit Cloudflare Workers". Batasi ke akun yang dipakai di `wrangler.jsonc`.
+2. Simpan sebagai secret repo `CLOUDFLARE_API_TOKEN` (GitHub → Settings → Secrets and variables → Actions), atau:
+
+```powershell
+gh secret set CLOUDFLARE_API_TOKEN
+```
+
+Tanpa secret ini workflow gagal dengan pesan yang jelas; deploy manual di bawah tetap bisa dipakai.
+
 ## Cloudflare Workers Static Assets
 
 Konfigurasi `wrangler.jsonc` memakai Worker `karhutla-watch` pada custom domain `karhutla.my.id`. Wrangler terpasang sebagai dependensi pengembangan. Untuk fork, ganti `account_id`, nama Worker, dan domain dengan milik sendiri sebelum deployment. Jangan menaruh token pada konfigurasi ini.
