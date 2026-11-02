@@ -4,8 +4,9 @@ import type { Hotspot } from "../domain/types";
 import { REGIONS } from "../domain/filters";
 import { element, formatDate } from "./dom";
 import { heatmapGeojson } from "../domain/heatmap";
+import { worldGeojson, type WorldPoint } from "../domain/world";
 import { basemapPaint, basemapStyle, satelliteSource, type MapAppearance } from "./basemap";
-import { clusterPaint, densityPaint, observationPaint } from "./detection-style";
+import { clusterPaint, densityPaint, observationPaint, worldPaint } from "./detection-style";
 import { overlayOpacity, type OverlayVisibility } from "./detection-controls";
 
 maplibregl.setWorkerCount(2);
@@ -22,6 +23,8 @@ export class HotspotMap {
   // Pengali dari pengaturan transparansi pengguna, bertumpuk dengan mode samar.
   private overlayScale = 1;
   private newsVisible = true;
+  private worldPoints: WorldPoint[] = [];
+  private worldVisible = false;
 
   constructor(container: HTMLElement, onError: (message: string) => void) {
     this.map = new maplibregl.Map({
@@ -42,6 +45,9 @@ export class HotspotMap {
       this.map.addSource("hotspots", { type: "geojson", data: this.geojson(), cluster: true, clusterRadius: 38, clusterMaxZoom: 8 });
       this.map.addSource("heatpoints", { type: "geojson", data: heatmapGeojson(this.points), maxzoom: 10 });
       this.map.addSource("observations", { type: "geojson", data: this.geojson(), maxzoom: 16 });
+      this.map.addSource("world", { type: "geojson", data: worldGeojson(this.worldPoints) });
+      // Deteksi luar Indonesia di bawah semua lapisan Indonesia agar fokus tetap pada Indonesia.
+      this.map.addLayer({ id: "world", type: "circle", source: "world", layout: { visibility: "none" }, paint: worldPaint(1) });
       this.map.addLayer({
         id: "heatmap", type: "heatmap", source: "heatpoints",
         layout: { visibility: "none" },
@@ -95,6 +101,17 @@ export class HotspotMap {
     const visible = this.overlayVisibility !== "off";
     for (const id of ["clusters", "points"]) this.map.setLayoutProperty(id, "visibility", visible && mode === "points" ? "visible" : "none");
     for (const id of ["heatmap", "heatmap-observations"]) this.map.setLayoutProperty(id, "visibility", visible && mode === "heatmap" ? "visible" : "none");
+    this.map.setLayoutProperty("world", "visibility", visible && this.worldVisible ? "visible" : "none");
+  }
+
+  setWorld(points: WorldPoint[]): void {
+    this.worldPoints = points;
+    if (this.ready) (this.map.getSource("world") as GeoJSONSource).setData(worldGeojson(points));
+  }
+
+  setWorldVisible(visible: boolean): void {
+    this.worldVisible = visible;
+    this.setMode(this.mode);
   }
 
   setOverlayVisibility(visibility: OverlayVisibility): void {
@@ -106,6 +123,7 @@ export class HotspotMap {
     for (const [layer, paint] of Object.entries(paints)) {
       for (const [property, value] of Object.entries(paint!)) this.map.setPaintProperty(layer, property, value);
     }
+    this.map.setPaintProperty("world", "circle-opacity", worldPaint(opacity)!["circle-opacity"]);
     this.setMode(this.mode);
   }
 

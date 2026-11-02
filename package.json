@@ -16,6 +16,7 @@
     "deploy": "bun run build && bunx --bun wrangler deploy",
     "deploy:scheduler": "bunx --bun wrangler deploy --config scheduler/wrangler.jsonc",
     "collect": "bun scripts/collect.ts",
+    "collect:world": "bun scripts/world.ts",
     "collect:news": "bun scripts/collect.ts --news-only",
     "prepare:locations": "bun scripts/locations.ts",
     "prepare:provinces": "bun scripts/provinces.ts",

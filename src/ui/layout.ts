@@ -27,6 +27,7 @@ export const layout = `
     <div class="map-summary surface" aria-label="Jumlah deteksi">
       <strong id="count">…</strong><span>deteksi</span>
       <div class="view-toggle" role="group" aria-label="Tampilan peta"><button id="view-points" type="button" aria-pressed="false">Titik</button><button id="view-heatmap" type="button" aria-pressed="true">Heatmap</button></div>
+      <button id="toggle-world" class="world-toggle" type="button" aria-pressed="false" title="Tampilkan deteksi di luar Indonesia (24 jam terakhir)">Dunia</button>
     </div>
     <div class="map-controls">
     <div class="map-appearance surface" role="group" aria-label="Mode peta dasar">
@@ -73,7 +74,7 @@ export const layout = `
         <div class="official-links"><a href="https://data.bmkg.go.id/prakiraan-cuaca/" target="_blank" rel="noopener noreferrer">Prakiraan BMKG ↗</a><a href="https://github.com/cahyadsn/wilayah" target="_blank" rel="noopener noreferrer">Referensi wilayah ↗</a><a href="./data/locations-LICENSE.txt" target="_blank" rel="noopener noreferrer">Lisensi daftar wilayah ↗</a></div>
       </section>
     </aside>
-    <div class="map-legend surface" hidden><div class="legend" aria-label="Keyakinan deteksi"><span><i class="dot high"></i>Tinggi</span><span><i class="dot nominal"></i>Nominal</span><span><i class="dot low"></i>Rendah</span></div></div>
+    <div class="map-legend surface" hidden><div class="legend" aria-label="Keyakinan deteksi"><span><i class="dot high"></i>Tinggi</span><span><i class="dot nominal"></i>Nominal</span><span><i class="dot low"></i>Rendah</span></div><span id="world-legend" class="legend" hidden><i class="dot world"></i>Luar Indonesia</span></div>
   </section>
 
   <aside id="berita" class="news-panel surface" aria-labelledby="news-title">

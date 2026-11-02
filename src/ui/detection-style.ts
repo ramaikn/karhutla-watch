@@ -22,6 +22,15 @@ export function clusterPaint(opacity = 1): CircleLayerSpecification["paint"] {
   };
 }
 
+// Biru-ungu membedakan deteksi luar Indonesia dari oranye-merah milik Indonesia.
+export function worldPaint(opacity = 1): CircleLayerSpecification["paint"] {
+  return {
+    "circle-color": ["match", ["get", "high"], 1, "#6f8cff", "#a3a0ff"],
+    "circle-radius": ["interpolate", ["linear"], ["zoom"], 0, 1, 4, 1.4, 8, 2.4, 14, 4],
+    "circle-opacity": 0.75 * opacity,
+  };
+}
+
 export function observationPaint(opacity = 1, detailed = false): CircleLayerSpecification["paint"] {
   // Deteksi terpisah tetap terlihat, termasuk pada tampilan nasional.
   const alpha: number | ExpressionSpecification = detailed ? ["interpolate", ["linear"], ["zoom"], 0, 0.8 * opacity, 10, 0.95 * opacity] : 0.85 * opacity;

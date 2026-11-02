@@ -14,6 +14,7 @@ import { NewsPanel } from "./ui/news-panel";
 import { dataUrl } from "./domain/data-url";
 import type { MapAppearance } from "./ui/basemap";
 import { initializeMapAppearance } from "./ui/map-appearance";
+import { decodeWorld } from "./domain/world";
 import { initializeFullscreen } from "./ui/fullscreen";
 import { initializeOpacityPanel } from "./ui/opacity-panel";
 import { initializeDetectionControls, type OverlayVisibility } from "./ui/detection-controls";
@@ -26,6 +27,8 @@ let mode: "points" | "heatmap" = "heatmap";
 let appearance: MapAppearance = "natural";
 let overlayVisibility: OverlayVisibility = "normal";
 let layerScale = 1;
+let worldOn = false;
+let world: ReturnType<typeof decodeWorld> | null = null;
 let loading = false;
 let mapFingerprint = "";
 const snapshotUrl = dataUrl("latest.json");
@@ -43,6 +46,8 @@ async function initializeMap(): Promise<void> {
     map.setAppearance(appearance);
     map.setOverlayVisibility(overlayVisibility);
     map.setOverlayScale(layerScale);
+    if (world) map.setWorld(world.points);
+    map.setWorldVisible(worldOn);
     // Alat peta berdampingan dengan tombol zoom agar tidak tertutup panel bawah.
     const tools = document.querySelector(".map-tools");
     if (tools) document.querySelector(".maplibregl-ctrl-top-right")?.prepend(tools);
@@ -114,8 +119,37 @@ async function load(): Promise<void> {
 
 // Legenda warna hanya relevan untuk titik; heatmap memakai warna kepadatan.
 function updateLegend(): void {
-  document.querySelector<HTMLElement>(".map-legend")!.hidden = mode === "heatmap" || overlayVisibility === "off";
+  const dots = document.querySelector<HTMLElement>(".legend:not(#world-legend)")!;
+  dots.hidden = mode === "heatmap";
+  node("world-legend").hidden = !worldOn;
+  document.querySelector<HTMLElement>(".map-legend")!.hidden = (dots.hidden && !worldOn) || overlayVisibility === "off";
 }
+
+// Data dunia berukuran besar, jadi baru diunduh saat pertama kali diaktifkan.
+async function loadWorld(): Promise<void> {
+  try {
+    const response = await fetch(dataUrl("world.json"), { signal: AbortSignal.timeout(60_000) });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    world = decodeWorld(await response.json());
+    map?.setWorld(world.points);
+  } catch (error) {
+    console.error("Data dunia gagal dimuat", error);
+    worldOn = false;
+    node("toggle-world").setAttribute("aria-pressed", "false");
+    map?.setWorldVisible(false);
+    node("map-error").textContent = "Deteksi dunia belum dapat dimuat. Deteksi Indonesia tetap tersedia.";
+    node("map-error").hidden = false;
+    updateLegend();
+  }
+}
+
+node("toggle-world").addEventListener("click", () => {
+  worldOn = !worldOn;
+  node("toggle-world").setAttribute("aria-pressed", String(worldOn));
+  map?.setWorldVisible(worldOn);
+  updateLegend();
+  if (worldOn && !world) void loadWorld();
+});
 
 for (const selected of ["points", "heatmap"] as const) {
   node(`view-${selected}`).addEventListener("click", () => {

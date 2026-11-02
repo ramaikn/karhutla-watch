@@ -9,7 +9,10 @@ const downloads: Record<Sensor, { directory: string; prefix: string }> = {
 };
 
 // Unduhan global besar diproses per baris. Hanya kotak Indonesia yang dinormalisasi.
-export async function readPublicCsv(response: Response, sensor: Sensor, contains: (point: Hotspot) => boolean): Promise<Hotspot[]> {
+export const INDONESIA_BOX: [number, number, number, number] = [94, -11.5, 142, 6.5];
+
+// `box` null = seluruh dunia (lapisan peta dunia).
+export async function readPublicCsv(response: Response, sensor: Sensor, contains: (point: Hotspot) => boolean, box: typeof INDONESIA_BOX | null = INDONESIA_BOX): Promise<Hotspot[]> {
   if (!response.body) throw new Error("Unduhan NASA tidak memiliki isi.");
   let pending = "", header = "", latitudeIndex = -1, longitudeIndex = -1;
   const points: Hotspot[] = [];
@@ -26,7 +29,7 @@ export async function readPublicCsv(response: Response, sensor: Sensor, contains
     }
     const columns = clean.split(","), latitude = Number(columns[latitudeIndex]), longitude = Number(columns[longitudeIndex]);
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) throw new Error("Koordinat unduhan NASA tidak valid.");
-    if (longitude < 94 || longitude > 142 || latitude < -11.5 || latitude > 6.5) return;
+    if (box && (longitude < box[0] || longitude > box[2] || latitude < box[1] || latitude > box[3])) return;
     const point = normalizeFirms(`${header}\n${clean}\n`, sensor)[0];
     if (contains(point)) points.push(point);
   }
@@ -47,9 +50,9 @@ export async function readPublicCsv(response: Response, sensor: Sensor, contains
   } finally { await reader.cancel().catch(() => {}); reader.releaseLock(); }
 }
 
-export async function fetchPublicFirms(sensor: Sensor, days: 1 | 7, contains: (point: Hotspot) => boolean): Promise<Hotspot[]> {
+export async function fetchPublicFirms(sensor: Sensor, days: 1 | 7, contains: (point: Hotspot) => boolean, box: typeof INDONESIA_BOX | null = INDONESIA_BOX): Promise<Hotspot[]> {
   const source = downloads[sensor];
   const suffix = days === 7 ? "7d" : "24h";
   const url = `https://firms.modaps.eosdis.nasa.gov/data/active_fire/${source.directory}/csv/${source.prefix}_Global_${suffix}.csv`;
-  return readPublicCsv(await request(url, "text/csv", 120_000), sensor, contains);
+  return readPublicCsv(await request(url, "text/csv", 120_000), sensor, contains, box);
 }
