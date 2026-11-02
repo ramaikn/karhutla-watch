@@ -1,23 +1,28 @@
-// Satu tingkat opasitas (persen) untuk semua komponen peta. 100 = tampilan asli.
-// Batas bawah menjaga komponen tetap dapat ditemukan di peta.
-export const MIN_OPACITY = 10;
+// Tiga tingkat transparansi (persen opasitas) untuk komponen antarmuka; 100 = tampilan asli.
+// Indikator deteksi di peta tidak termasuk: itu diatur tombol mata.
+export const OPACITY_LEVELS = [100, 55, 20] as const;
+export type OpacityLevel = (typeof OPACITY_LEVELS)[number];
+export const LEVEL_NAMES: Record<OpacityLevel, string> = { 100: "normal", 55: "samar", 20: "sangat samar" };
 export const STORAGE_KEY = "karhutla-watch:opacity";
 
-export function clampOpacity(value: unknown): number {
-  const number = typeof value === "number" ? value : Number.NaN;
-  return Number.isFinite(number) ? Math.min(100, Math.max(MIN_OPACITY, Math.round(number))) : 100;
+export function nextLevel(current: OpacityLevel): OpacityLevel {
+  return OPACITY_LEVELS[(OPACITY_LEVELS.indexOf(current) + 1) % OPACITY_LEVELS.length];
 }
 
-// Data tersimpan dianggap tidak tepercaya: nilai rusak jatuh ke 100.
-export function loadOpacity(storage: Pick<Storage, "getItem"> | undefined): number {
+// Data tersimpan dianggap tidak tepercaya: nilai di luar tiga tingkat jatuh ke normal.
+export function parseLevel(value: unknown): OpacityLevel {
+  return OPACITY_LEVELS.find((level) => level === value) ?? 100;
+}
+
+export function loadLevel(storage: Pick<Storage, "getItem"> | undefined): OpacityLevel {
   try {
     const text = storage?.getItem(STORAGE_KEY);
-    return clampOpacity(text ? Number(JSON.parse(text)) : null);
+    return parseLevel(text ? JSON.parse(text) : null);
   } catch {
     return 100;
   }
 }
 
-export function saveOpacity(storage: Pick<Storage, "setItem"> | undefined, percent: number): void {
-  try { storage?.setItem(STORAGE_KEY, JSON.stringify(percent)); } catch { /* penyimpanan dinonaktifkan; berlaku sesi ini saja */ }
+export function saveLevel(storage: Pick<Storage, "setItem"> | undefined, level: OpacityLevel): void {
+  try { storage?.setItem(STORAGE_KEY, JSON.stringify(level)); } catch { /* penyimpanan dinonaktifkan; berlaku sesi ini saja */ }
 }

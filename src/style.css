@@ -148,15 +148,9 @@ nav button[aria-expanded="true"] { border-color: var(--line); background: var(--
 .map-tools button { display: grid; place-items: center; width: 29px; height: 29px; padding: 0; background: transparent; border: 0; border-radius: 0; }
 .map-tools button + button { border-top: 1px solid var(--line); }
 .map-tools button:hover { background: var(--btn-hover, #30363e); }
-.map-tools button[aria-expanded="true"] { background: var(--btn-active, #3a424c); }
 .map-tools svg { width: 18px; height: 18px; }
-.filter-popover, .opacity-panel { --surface-mix: 100%; --line: #343a43; --btn: #23282f; --btn-hover: #30363e; --btn-active: #3a424c; --field: #11151a; }
-.opacity-panel { position: absolute; top: 0; right: calc(100% + 8px); width: 220px; padding: 12px 14px 14px; display: grid; gap: 12px; }
-.opacity-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.opacity-heading h3 { margin: 0; }
-.opacity-label { display: flex; justify-content: space-between; gap: 10px; }
-.opacity-label output { color: var(--muted); font-variant-numeric: tabular-nums; }
-.opacity-row input[type="range"] { min-height: 0; padding: 0; width: 100%; accent-color: #e6b36c; background: transparent; border: 0; }
+.filter-popover { --surface-mix: 100%; --line: #343a43; --btn: #23282f; --btn-hover: #30363e; --btn-active: #3a424c; --field: #11151a; }
+.map-tools #toggle-opacity:not([data-level="100"]) { color: #e6b36c; }
 .about-dialog { width: min(440px, calc(100% - 32px)); max-height: calc(100svh - 32px); padding: 20px; color: var(--text); overflow: auto; }
 .about-dialog::backdrop { background: #0008; }
 .about-dialog p { font-size: 13px; line-height: 1.7; color: var(--muted); margin: 16px 0; }

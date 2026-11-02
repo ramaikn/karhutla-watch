@@ -38,9 +38,8 @@ export const layout = `
     </div>
     <div class="map-tools maplibregl-ctrl maplibregl-ctrl-group" role="group" aria-label="Alat peta">
       <button id="toggle-fullscreen" type="button" aria-label="Peta layar penuh" title="Peta layar penuh" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="enter-fullscreen" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><path class="exit-fullscreen" d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/></svg></button>
-      <button id="toggle-opacity" type="button" aria-label="Pengaturan transparansi" title="Pengaturan transparansi" aria-controls="opacity-panel" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.2 6 10.5a6 6 0 0 1-12 0C6 9.2 12 3 12 3Z"/><path d="M12 7.5v12" stroke-dasharray="2 2"/></svg></button>
+      <button id="toggle-opacity" type="button" aria-label="Pengaturan transparansi" title="Pengaturan transparansi" data-level="100"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.2 6 10.5a6 6 0 0 1-12 0C6 9.2 12 3 12 3Z"/><path d="M12 7.5v12" stroke-dasharray="2 2"/></svg></button>
     </div>
-    <div id="opacity-panel" class="opacity-panel surface" role="group" aria-label="Transparansi komponen" hidden></div>
     </div>
     <p id="load-error" class="error-message surface" role="alert" hidden></p>
     <div id="map-empty" class="map-message surface" role="status" hidden></div>

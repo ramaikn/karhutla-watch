@@ -16,7 +16,7 @@ import type { MapAppearance } from "./ui/basemap";
 import { initializeMapAppearance } from "./ui/map-appearance";
 import { decodeWorld } from "./domain/world";
 import { initializeFullscreen } from "./ui/fullscreen";
-import { initializeOpacityPanel } from "./ui/opacity-panel";
+import { initializeOpacityControl } from "./ui/opacity-control";
 import { initializeDetectionControls, type OverlayVisibility } from "./ui/detection-controls";
 
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = layout;
@@ -26,7 +26,6 @@ let map: HotspotMap | null = null;
 let mode: "points" | "heatmap" = "heatmap";
 let appearance: MapAppearance = "natural";
 let overlayVisibility: OverlayVisibility = "normal";
-let layerScale = 1;
 let worldOn = false;
 let world: ReturnType<typeof decodeWorld> | null = null;
 let loading = false;
@@ -45,7 +44,6 @@ async function initializeMap(): Promise<void> {
     map.setMode(mode);
     map.setAppearance(appearance);
     map.setOverlayVisibility(overlayVisibility);
-    map.setOverlayScale(layerScale);
     if (world) map.setWorld(world.points);
     map.setWorldVisible(worldOn);
     // Alat peta berdampingan dengan tombol zoom agar tidak tertutup panel bawah.
@@ -195,7 +193,7 @@ node("download").addEventListener("click", () => {
 });
 initializeWorkspace(() => map);
 initializeFullscreen(document.querySelector<HTMLElement>(".workspace")!, node<HTMLButtonElement>("toggle-fullscreen"));
-initializeOpacityPanel(document.querySelector<HTMLElement>(".workspace")!, (scale) => { layerScale = scale; map?.setOverlayScale(scale); });
+initializeOpacityControl(document.querySelector<HTMLElement>(".workspace")!);
 void load();
 void initializeMap();
 // Hitungan waktu dan status kedaluwarsa tetap benar jika tab dibiarkan terbuka.
